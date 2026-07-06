@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Условия использования — Лидосток</title>
+  <link rel="icon" type="image/png" href="images/logo-dark.png">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header" id="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <img src="images/logo-light.png" alt="Лидосток" class="logo-img">
+      </a>
+      <nav class="nav">
+        <a href="index.html#features" class="nav-link">Возможности</a>
+        <a href="index.html#integrations" class="nav-link">Интеграции</a>
+        <a href="index.html#pricing" class="nav-link">Тарифы</a>
+        <a href="index.html#testimonials" class="nav-link">Отзывы</a>
+      </nav>
+      <div class="header-buttons">
+        <a href="login.html" class="header-login">Войти</a>
+        <a href="register.html" class="btn btn-primary">Начать бесплатно</a>
+      </div>
+      <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-close" onclick="toggleMenu()">&times;</button>
+    <a href="index.html#features" class="mobile-link" onclick="toggleMenu()">Возможности</a>
+    <a href="index.html#integrations" class="mobile-link" onclick="toggleMenu()">Интеграции</a>
+    <a href="index.html#pricing" class="mobile-link" onclick="toggleMenu()">Тарифы</a>
+    <a href="index.html#testimonials" class="mobile-link" onclick="toggleMenu()">Отзывы</a>
+    <a href="login.html" class="mobile-link" onclick="toggleMenu()">Войти</a>
+    <a href="register.html" class="btn btn-primary" onclick="toggleMenu()">Начать бесплатно</a>
+  </div>
+
+  <!-- ===== TERMS ===== -->
+  <main class="legal-main">
+    <div class="container">
+      <div class="legal-content">
+        <h1>Условия использования</h1>
+        <p class="legal-updated">Последнее обновление: 5 июля 2026 г.</p>
+
+        <div class="legal-note">
+          Это типовой шаблон пользовательского соглашения. Перед публикацией рекомендуем адаптировать текст под юрисдикцию и реальные условия тарифов вместе с юристом.
+        </div>
+
+        <h2>1. Предмет соглашения</h2>
+        <p>Настоящие условия регулируют порядок использования сервиса «Лидосток» (далее — «Сервис»), предоставляемого для сбора, распределения и анализа заявок из мессенджеров, соцсетей и рекламных кабинетов. Регистрируясь в Сервисе, пользователь принимает данные условия в полном объёме.</p>
+
+        <h2>2. Регистрация и аккаунт</h2>
+        <p>Для использования Сервиса необходимо создать аккаунт, указав достоверные данные. Пользователь несёт ответственность за сохранность логина и пароля и за все действия, совершённые под его учётной записью.</p>
+
+        <h2>3. Тарифы и оплата</h2>
+        <ul>
+          <li>Пробный период предоставляется на 14 дней без привязки банковской карты;</li>
+          <li>После окончания пробного периода для продолжения работы требуется выбрать платный тариф;</li>
+          <li>Стоимость тарифов указана на странице «Тарифы» и может быть изменена с уведомлением пользователей не менее чем за 14 дней;</li>
+          <li>Оплаченные периоды использования Сервиса возврату не подлежат, если иное не предусмотрено законом.</li>
+        </ul>
+
+        <h2>4. Права и обязанности пользователя</h2>
+        <p>Пользователь обязуется не использовать Сервис для рассылки спама, незаконной деятельности, распространения вредоносного ПО, а также не пытаться получить несанкционированный доступ к инфраструктуре Сервиса.</p>
+
+        <h2>5. Интеллектуальная собственность</h2>
+        <p>Все права на программное обеспечение, дизайн и товарный знак «Лидосток» принадлежат правообладателю. Использование материалов Сервиса без письменного разрешения запрещено.</p>
+
+        <h2>6. Ограничение ответственности</h2>
+        <p>Сервис предоставляется «как есть». Мы прилагаем разумные усилия для обеспечения бесперебойной работы, но не гарантируем полное отсутствие сбоев и не несём ответственности за косвенные убытки, возникшие в результате использования или невозможности использования Сервиса.</p>
+
+        <h2>7. Изменение условий</h2>
+        <p>Мы можем обновлять данные условия. Актуальная версия всегда доступна на этой странице. Продолжение использования Сервиса после внесения изменений означает согласие с новой редакцией.</p>
+
+        <h2>8. Расторжение</h2>
+        <p>Пользователь может прекратить использование Сервиса и удалить аккаунт в любой момент. Мы оставляем за собой право приостановить доступ при нарушении настоящих условий.</p>
+
+        <h2>9. Контакты</h2>
+        <p>По вопросам, связанным с условиями использования, обращайтесь по email: <strong>legal@lidostock.ru</strong> или через <a href="contact.html">страницу контактов</a>.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">
+            <img src="images/logo-light.png" alt="Лидосток" class="logo-img">
+          </div>
+          <p>Единая система для сбора, распределения и аналитики лидов.</p>
+          <p style="margin-top:8px;font-size:12px;font-weight:700;letter-spacing:0.15em;color:var(--blue);">ЛИДЫ В ПОТОК. ПРОДАЖИ В РОСТ.</p>
+        </div>
+        <div class="footer-col">
+          <h4>ПРОДУКТ</h4>
+          <a href="index.html#features">Возможности</a>
+          <a href="index.html#integrations">Интеграции</a>
+          <a href="index.html#pricing">Тарифы</a>
+          <a href="soon.html?page=api">API</a>
+        </div>
+        <div class="footer-col">
+          <h4>КОМПАНИЯ</h4>
+          <a href="about.html">О нас</a>
+          <a href="blog.html">Блог</a>
+          <a href="soon.html?page=careers">Карьера</a>
+          <a href="contact.html">Контакты</a>
+        </div>
+        <div class="footer-col">
+          <h4>ПОДДЕРЖКА</h4>
+          <a href="soon.html?page=help">Помощь</a>
+          <a href="soon.html?page=docs">Документация</a>
+          <a href="soon.html?page=status">Статус системы</a>
+          <a href="soon.html?page=security">Безопасность</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Лидосток. Все права защищены.</p>
+        <div>
+          <a href="privacy.html">Политика конфиденциальности</a>
+          <a href="terms.html">Условия использования</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

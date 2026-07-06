@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Политика конфиденциальности — Лидосток</title>
+  <link rel="icon" type="image/png" href="images/logo-dark.png">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header" id="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <img src="images/logo-light.png" alt="Лидосток" class="logo-img">
+      </a>
+      <nav class="nav">
+        <a href="index.html#features" class="nav-link">Возможности</a>
+        <a href="index.html#integrations" class="nav-link">Интеграции</a>
+        <a href="index.html#pricing" class="nav-link">Тарифы</a>
+        <a href="index.html#testimonials" class="nav-link">Отзывы</a>
+      </nav>
+      <div class="header-buttons">
+        <a href="login.html" class="header-login">Войти</a>
+        <a href="register.html" class="btn btn-primary">Начать бесплатно</a>
+      </div>
+      <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-close" onclick="toggleMenu()">&times;</button>
+    <a href="index.html#features" class="mobile-link" onclick="toggleMenu()">Возможности</a>
+    <a href="index.html#integrations" class="mobile-link" onclick="toggleMenu()">Интеграции</a>
+    <a href="index.html#pricing" class="mobile-link" onclick="toggleMenu()">Тарифы</a>
+    <a href="index.html#testimonials" class="mobile-link" onclick="toggleMenu()">Отзывы</a>
+    <a href="login.html" class="mobile-link" onclick="toggleMenu()">Войти</a>
+    <a href="register.html" class="btn btn-primary" onclick="toggleMenu()">Начать бесплатно</a>
+  </div>
+
+  <!-- ===== PRIVACY ===== -->
+  <main class="legal-main">
+    <div class="container">
+      <div class="legal-content">
+        <h1>Политика конфиденциальности</h1>
+        <p class="legal-updated">Последнее обновление: 5 июля 2026 г.</p>
+
+        <div class="legal-note">
+          Это типовой шаблон политики конфиденциальности. Перед публикацией на реальном сайте рекомендуем согласовать текст с юристом с учётом того, какие данные вы фактически собираете, и требований 152-ФЗ «О персональных данных».
+        </div>
+
+        <h2>1. Общие положения</h2>
+        <p>Настоящая политика конфиденциальности определяет порядок обработки и защиты персональных данных пользователей сервиса «Лидосток» (далее — «Сервис»). Используя Сервис, вы соглашаетесь с условиями данной политики.</p>
+
+        <h2>2. Какие данные мы собираем</h2>
+        <ul>
+          <li>Регистрационные данные: имя, email, телефон, название компании;</li>
+          <li>Данные об использовании Сервиса: действия в интерфейсе, журналы обращений;</li>
+          <li>Технические данные: IP-адрес, тип устройства и браузера, файлы cookie;</li>
+          <li>Данные, поступающие из подключённых вами источников (мессенджеры, рекламные кабинеты, CRM).</li>
+        </ul>
+
+        <h2>3. Цели обработки данных</h2>
+        <p>Мы используем собранные данные для предоставления доступа к Сервису, обработки заявок, технической поддержки, улучшения качества работы платформы, а также для информирования об обновлениях и специальных предложениях, если вы дали на это согласие.</p>
+
+        <h2>4. Передача данных третьим лицам</h2>
+        <p>Мы не продаём и не передаём персональные данные третьим лицам, за исключением случаев, необходимых для оказания услуг (например, интеграция с подключёнными вами мессенджерами и CRM-системами), или если это требуется по закону.</p>
+
+        <h2>5. Хранение и защита данных</h2>
+        <p>Персональные данные хранятся на защищённых серверах с применением технических и организационных мер защиты. Срок хранения данных ограничивается сроком действия договора и требованиями законодательства.</p>
+
+        <h2>6. Файлы cookie</h2>
+        <p>Сервис использует файлы cookie для обеспечения корректной работы сайта, аналитики и персонализации контента. Вы можете отключить cookie в настройках браузера, однако это может повлиять на работу отдельных функций.</p>
+
+        <h2>7. Права пользователя</h2>
+        <ul>
+          <li>Запросить копию своих персональных данных;</li>
+          <li>Потребовать исправления неточных данных;</li>
+          <li>Отозвать согласие на обработку данных и потребовать их удаления;</li>
+          <li>Отказаться от получения рекламных рассылок.</li>
+        </ul>
+
+        <h2>8. Контакты</h2>
+        <p>По всем вопросам, связанным с обработкой персональных данных, вы можете обратиться к нам по email: <strong>privacy@lidostock.ru</strong> или через <a href="contact.html">страницу контактов</a>.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">
+            <img src="images/logo-light.png" alt="Лидосток" class="logo-img">
+          </div>
+          <p>Единая система для сбора, распределения и аналитики лидов.</p>
+          <p style="margin-top:8px;font-size:12px;font-weight:700;letter-spacing:0.15em;color:var(--blue);">ЛИДЫ В ПОТОК. ПРОДАЖИ В РОСТ.</p>
+        </div>
+        <div class="footer-col">
+          <h4>ПРОДУКТ</h4>
+          <a href="index.html#features">Возможности</a>
+          <a href="index.html#integrations">Интеграции</a>
+          <a href="index.html#pricing">Тарифы</a>
+          <a href="soon.html?page=api">API</a>
+        </div>
+        <div class="footer-col">
+          <h4>КОМПАНИЯ</h4>
+          <a href="about.html">О нас</a>
+          <a href="blog.html">Блог</a>
+          <a href="soon.html?page=careers">Карьера</a>
+          <a href="contact.html">Контакты</a>
+        </div>
+        <div class="footer-col">
+          <h4>ПОДДЕРЖКА</h4>
+          <a href="soon.html?page=help">Помощь</a>
+          <a href="soon.html?page=docs">Документация</a>
+          <a href="soon.html?page=status">Статус системы</a>
+          <a href="soon.html?page=security">Безопасность</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Лидосток. Все права защищены.</p>
+        <div>
+          <a href="privacy.html">Политика конфиденциальности</a>
+          <a href="terms.html">Условия использования</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Раздел в разработке — Лидосток</title>
+  <link rel="icon" type="image/png" href="images/logo-dark.png">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="simple-page">
+
+  <!-- ===== HEADER ===== -->
+  <header class="header" id="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <img src="images/logo-light.png" alt="Лидосток" class="logo-img">
+      </a>
+      <nav class="nav">
+        <a href="index.html#features" class="nav-link">Возможности</a>
+        <a href="index.html#integrations" class="nav-link">Интеграции</a>
+        <a href="index.html#pricing" class="nav-link">Тарифы</a>
+        <a href="index.html#testimonials" class="nav-link">Отзывы</a>
+      </nav>
+      <div class="header-buttons">
+        <a href="login.html" class="header-login">Войти</a>
+        <a href="register.html" class="btn btn-primary">Начать бесплатно</a>
+      </div>
+      <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-close" onclick="toggleMenu()">&times;</button>
+    <a href="index.html#features" class="mobile-link" onclick="toggleMenu()">Возможности</a>
+    <a href="index.html#integrations" class="mobile-link" onclick="toggleMenu()">Интеграции</a>
+    <a href="index.html#pricing" class="mobile-link" onclick="toggleMenu()">Тарифы</a>
+    <a href="index.html#testimonials" class="mobile-link" onclick="toggleMenu()">Отзывы</a>
+    <a href="login.html" class="mobile-link" onclick="toggleMenu()">Войти</a>
+    <a href="register.html" class="btn btn-primary" onclick="toggleMenu()">Начать бесплатно</a>
+  </div>
+
+  <!-- ===== SOON ===== -->
+  <main class="simple-main">
+    <div id="soonContent">
+      <div class="simple-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <p class="simple-eyebrow">СКОРО</p>
+      <h1 class="simple-title">Страница в разработке</h1>
+      <p class="simple-text">Мы уже работаем над этим разделом. Загляните немного позже.</p>
+      <div class="simple-buttons">
+        <a href="index.html" class="btn btn-outline">На главную</a>
+        <a href="contact.html" class="btn btn-primary">Связаться с нами</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">
+            <img src="images/logo-light.png" alt="Лидосток" class="logo-img">
+          </div>
+          <p>Единая система для сбора, распределения и аналитики лидов.</p>
+          <p style="margin-top:8px;font-size:12px;font-weight:700;letter-spacing:0.15em;color:var(--blue);">ЛИДЫ В ПОТОК. ПРОДАЖИ В РОСТ.</p>
+        </div>
+        <div class="footer-col">
+          <h4>ПРОДУКТ</h4>
+          <a href="index.html#features">Возможности</a>
+          <a href="index.html#integrations">Интеграции</a>
+          <a href="index.html#pricing">Тарифы</a>
+          <a href="soon.html?page=api">API</a>
+        </div>
+        <div class="footer-col">
+          <h4>КОМПАНИЯ</h4>
+          <a href="about.html">О нас</a>
+          <a href="blog.html">Блог</a>
+          <a href="soon.html?page=careers">Карьера</a>
+          <a href="contact.html">Контакты</a>
+        </div>
+        <div class="footer-col">
+          <h4>ПОДДЕРЖКА</h4>
+          <a href="soon.html?page=help">Помощь</a>
+          <a href="soon.html?page=docs">Документация</a>
+          <a href="soon.html?page=status">Статус системы</a>
+          <a href="soon.html?page=security">Безопасность</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Лидосток. Все права защищены.</p>
+        <div>
+          <a href="privacy.html">Политика конфиденциальности</a>
+          <a href="terms.html">Условия использования</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

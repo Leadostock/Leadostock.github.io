@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>О нас — Лидосток</title>
+  <link rel="icon" type="image/png" href="images/logo-dark.png">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header" id="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <img src="images/logo-light.png" alt="Лидосток" class="logo-img">
+      </a>
+      <nav class="nav">
+        <a href="index.html#features" class="nav-link">Возможности</a>
+        <a href="index.html#integrations" class="nav-link">Интеграции</a>
+        <a href="index.html#pricing" class="nav-link">Тарифы</a>
+        <a href="index.html#testimonials" class="nav-link">Отзывы</a>
+      </nav>
+      <div class="header-buttons">
+        <a href="login.html" class="header-login">Войти</a>
+        <a href="register.html" class="btn btn-primary">Начать бесплатно</a>
+      </div>
+      <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-close" onclick="toggleMenu()">&times;</button>
+    <a href="index.html#features" class="mobile-link" onclick="toggleMenu()">Возможности</a>
+    <a href="index.html#integrations" class="mobile-link" onclick="toggleMenu()">Интеграции</a>
+    <a href="index.html#pricing" class="mobile-link" onclick="toggleMenu()">Тарифы</a>
+    <a href="index.html#testimonials" class="mobile-link" onclick="toggleMenu()">Отзывы</a>
+    <a href="login.html" class="mobile-link" onclick="toggleMenu()">Войти</a>
+    <a href="register.html" class="btn btn-primary" onclick="toggleMenu()">Начать бесплатно</a>
+  </div>
+
+  <!-- ===== ABOUT HERO ===== -->
+  <main class="about-main">
+    <section class="about-hero">
+      <div class="container">
+        <p class="eyebrow" style="text-align:center;">МЫ — ЛИДОСТОК</p>
+        <h1 class="about-title">Помогаем российскому бизнесу<br><span class="grad-text">не терять клиентов</span></h1>
+        <p class="about-lead">
+          Мы направляем поток лидов из мессенджеров сразу в вашу CRM. Больше никаких потерь
+          из-за того, что про клиента забыли или уведомление не пришло. Все клиенты уже
+          у вас — в одном месте.
+        </p>
+        <div class="about-cta">
+          <a href="register.html" class="btn btn-primary btn-lg">Начать бесплатно</a>
+          <a href="https://t.me/Leadostock78" target="_blank" rel="noopener" class="btn btn-outline btn-lg">Мы в Telegram</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== STATS STRIP ===== -->
+    <section class="about-stats">
+      <div class="container about-stats-grid">
+        <div class="about-stat">
+          <div class="about-stat-num">0</div>
+          <div class="about-stat-label">потерянных заявок<br>по вине «забыли ответить»</div>
+        </div>
+        <div class="about-stat">
+          <div class="about-stat-num">4</div>
+          <div class="about-stat-label">канала в MVP:<br>Telegram, Email, VK, WhatsApp</div>
+        </div>
+        <div class="about-stat">
+          <div class="about-stat-num">1</div>
+          <div class="about-stat-label">окно, где собраны<br>все обращения клиентов</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== STORY ===== -->
+    <section class="about-story">
+      <div class="container about-story-grid">
+        <div class="about-story-text">
+          <p class="eyebrow">ЗАЧЕМ МЫ НУЖНЫ</p>
+          <h2 class="section-title">Заявки приходят отовсюду — и теряются</h2>
+          <p>
+            Клиенты пишут в Telegram, на почту, в Instagram, во ВКонтакте. Менеджер физически
+            не успевает держать все приложения открытыми. Одно пропущенное уведомление — и заявка
+            уходит к конкуренту, который ответил первым.
+          </p>
+          <p>
+            Лидосток решает это просто: каждое сообщение из любого канала автоматически
+            попадает в вашу CRM в виде готовой карточки — кто написал, откуда пришёл и чего хочет.
+            Менеджеру остаётся только ответить. Ничего не теряется.
+          </p>
+          <p style="font-weight:700;color:var(--blue);letter-spacing:0.03em;">
+            ЛИДЫ В ПОТОК. ПРОДАЖИ В РОСТ.
+          </p>
+        </div>
+        <div class="about-values">
+          <div class="about-value">
+            <div class="about-value-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div>
+              <strong>Ничего не теряется</strong>
+              <p>Каждое обращение фиксируется автоматически и сразу видно менеджеру.</p>
+            </div>
+          </div>
+          <div class="about-value">
+            <div class="about-value-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div>
+              <strong>Отвечаете быстрее</strong>
+              <p>Все каналы в одном окне — клиент получает ответ, пока ещё «горячий».</p>
+            </div>
+          </div>
+          <div class="about-value">
+            <div class="about-value-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </div>
+            <div>
+              <strong>Подключаем «под ключ»</strong>
+              <p>Настройку каналов берём на себя — вам не нужно разбираться с API.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FOLLOW / INSTAGRAM ===== -->
+    <section class="about-follow">
+      <div class="container about-follow-inner">
+        <div>
+          <p class="eyebrow">СЛЕДИТЕ ЗА НАМИ</p>
+          <h2 class="section-title">Мы в соцсетях</h2>
+          <p class="section-subtitle">Кейсы, советы по работе с лидами и новости продукта. Подписывайтесь на удобной площадке или наведите камеру на QR-код Instagram.</p>
+          <div class="social-links">
+            <a href="https://t.me/Leadostock78" target="_blank" rel="noopener" class="social-link social-tg">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+              <span><strong>Telegram-канал</strong>Новости и анонсы</span>
+            </a>
+            <a href="https://vk.com/leadostock" target="_blank" rel="noopener" class="social-link social-vk">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13.162 18.994c-5.681 0-9.204-3.988-9.352-10.62h2.86c.101 4.866 2.303 6.9 3.99 7.32V8.374h2.71v4.09c1.653-.179 3.386-2.093 3.972-4.09h2.706c-.446 2.456-2.318 4.37-3.658 5.156 1.34.638 3.472 2.31 4.288 5.463h-2.98c-.636-1.99-2.22-3.528-4.328-3.74v3.74z"/></svg>
+              <span><strong>Группа ВКонтакте</strong>Сообщество и поддержка</span>
+            </a>
+            <a href="https://www.instagram.com/leadostok78?igsh=MWFjbGg2ejFyN282aQ%3D%3D&utm_source=qr" target="_blank" rel="noopener" class="social-link social-ig">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+              <span><strong>Instagram</strong>@leadostok78</span>
+            </a>
+          </div>
+        </div>
+        <div class="about-qr">
+          <img src="images/instagram-qr.jpg" alt="QR-код Instagram @leadostok78">
+          <span style="display:block;margin-top:10px;font-size:13px;color:var(--text-muted);text-align:center;">Instagram · @leadostok78</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">
+            <img src="images/logo-light.png" alt="Лидосток" class="logo-img">
+          </div>
+          <p>Единая система для сбора, распределения и аналитики лидов.</p>
+          <p style="margin-top:8px;font-size:12px;font-weight:700;letter-spacing:0.15em;color:var(--blue);">ЛИДЫ В ПОТОК. ПРОДАЖИ В РОСТ.</p>
+        </div>
+        <div class="footer-col">
+          <h4>ПРОДУКТ</h4>
+          <a href="index.html#features">Возможности</a>
+          <a href="index.html#integrations">Интеграции</a>
+          <a href="index.html#pricing">Тарифы</a>
+          <a href="soon.html?page=api">API</a>
+        </div>
+        <div class="footer-col">
+          <h4>КОМПАНИЯ</h4>
+          <a href="about.html">О нас</a>
+          <a href="blog.html">Блог</a>
+          <a href="soon.html?page=careers">Карьера</a>
+          <a href="contact.html">Контакты</a>
+        </div>
+        <div class="footer-col">
+          <h4>ПОДДЕРЖКА</h4>
+          <a href="soon.html?page=help">Помощь</a>
+          <a href="soon.html?page=docs">Документация</a>
+          <a href="soon.html?page=status">Статус системы</a>
+          <a href="soon.html?page=security">Безопасность</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Лидосток. Все права защищены.</p>
+        <div>
+          <a href="privacy.html">Политика конфиденциальности</a>
+          <a href="terms.html">Условия использования</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,875 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Лидосток — Все уведомления в одном потоке</title>
+    <link rel="icon" type="image/png" href="images/logo-dark.png" />
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- ===== HEADER ===== -->
+    <header class="header" id="header">
+      <div class="container header-inner">
+        <a href="index.html" class="logo">
+          <img src="images/logo-light.png" alt="Лидосток" class="logo-img" />
+        </a>
+        <nav class="nav">
+          <a href="#features" class="nav-link">Возможности</a>
+          <a href="#integrations" class="nav-link">Интеграции</a>
+          <a href="#pricing" class="nav-link">Тарифы</a>
+          <a href="#testimonials" class="nav-link">Отзывы</a>
+        </nav>
+        <div class="header-buttons">
+          <a href="login.html" class="header-login">Войти</a>
+          <a href="register.html" class="btn btn-primary">Начать бесплатно</a>
+        </div>
+        <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+      <button class="mobile-close" onclick="toggleMenu()">&times;</button>
+      <a href="#features" class="mobile-link" onclick="toggleMenu()"
+        >Возможности</a
+      >
+      <a href="#integrations" class="mobile-link" onclick="toggleMenu()"
+        >Интеграции</a
+      >
+      <a href="#pricing" class="mobile-link" onclick="toggleMenu()">Тарифы</a>
+      <a href="#testimonials" class="mobile-link" onclick="toggleMenu()"
+        >Отзывы</a
+      >
+      <a href="login.html" class="mobile-link" onclick="toggleMenu()">Войти</a>
+      <a href="register.html" class="btn btn-primary" onclick="toggleMenu()"
+        >Начать бесплатно</a
+      >
+    </div>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+      <div class="hero-bg">
+        <div class="hero-gradient"></div>
+        <div class="hero-particles" id="heroParticles"></div>
+      </div>
+      <div class="container hero-content">
+        <div class="badge">
+          <span class="badge-dot"></span>
+          <span>Бета-версия — 14 дней бесплатно</span>
+        </div>
+        <h1 class="hero-title">
+          Все уведомления<br />
+          <span class="text-gradient">в одном потоке</span>
+        </h1>
+        <p class="hero-subtitle">
+          Все сообщения из всех мессенджеров — в одной CRM. Ни один клиент
+          больше не останется без ответа.
+        </p>
+        <div class="hero-buttons">
+          <a href="#pricing" class="btn btn-primary btn-lg">Начать бесплатно</a>
+          <a href="#dashboard" class="btn btn-outline btn-lg"
+            >Посмотреть демо</a
+          >
+        </div>
+      </div>
+      <div class="scroll-down">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </div>
+    </section>
+
+    <!-- ===== PROBLEM ===== -->
+    <section class="problem-section" id="problem">
+      <div class="container">
+        <div class="section-header text-center">
+          <p class="eyebrow">ЗНАКОМАЯ СИТУАЦИЯ?</p>
+          <h2 class="section-title">Заявки приходят отовсюду — и теряются</h2>
+          <p class="section-subtitle">
+            Менеджер не успевает проверять все мессенджеры вручную — и часть
+            заявок просто теряется, пока их не заметили.
+          </p>
+        </div>
+        <div class="problem-grid">
+          <div class="problem-card">
+            <div
+              class="problem-icon"
+              style="background: rgba(239, 68, 68, 0.08); color: #ef4444"
+            >
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            </div>
+            <h3>Долгий ответ</h3>
+            <p>
+              Пока ищете сообщение среди вкладок, клиент уже пишет конкуренту
+            </p>
+          </div>
+          <div class="problem-card">
+            <div
+              class="problem-icon"
+              style="background: rgba(245, 158, 11, 0.08); color: #f59e0b"
+            >
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </div>
+            <h3>Потерянный клиент</h3>
+            <p>Заявка из Instagram или VK затерялась — и о ней просто забыли</p>
+          </div>
+          <div class="problem-card">
+            <div
+              class="problem-icon"
+              style="background: rgba(139, 92, 246, 0.08); color: #8b5cf6"
+            >
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <line x1="3" y1="9" x2="21" y2="9" />
+                <line x1="9" y1="21" x2="9" y2="9" />
+              </svg>
+            </div>
+            <h3>Нет единой картины</h3>
+            <p>
+              Менеджер не видит всех обращений клиента сразу — теряется контекст
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== LOGO MARQUEE ===== -->
+    <section class="marquee-section">
+      <div class="marquee-track" id="marqueeTrack">
+        <span>WHATSAPP</span><span>TELEGRAM</span><span>INSTAGRAM</span>
+        <span>FACEBOOK</span><span>VK</span><span>GOOGLE ADS</span>
+        <span>ЯНДЕКС.ДИРЕКТ</span><span>AVITO</span><span>SLACK</span>
+        <span>AMOCRM</span><span>BITRIX24</span><span>TIKTOK</span>
+        <span>WHATSAPP</span><span>TELEGRAM</span><span>INSTAGRAM</span>
+        <span>FACEBOOK</span><span>VK</span><span>GOOGLE ADS</span>
+        <span>ЯНДЕКС.ДИРЕКТ</span><span>AVITO</span><span>SLACK</span>
+        <span>AMOCRM</span><span>BITRIX24</span><span>TIKTOK</span>
+      </div>
+    </section>
+
+    <!-- ===== FEATURES ===== -->
+    <section class="features" id="features">
+      <div class="container">
+        <div class="section-header text-center">
+          <p class="eyebrow">ВОЗМОЖНОСТИ</p>
+          <h2 class="section-title">Всё, что нужно для роста продаж</h2>
+          <p class="section-subtitle">
+            Автоматизация, аналитика и управление лидами в одной системе.
+          </p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon blue">
+              <svg
+                width="48"
+                height="48"
+                viewBox="0 0 48 48"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M8 8h32l-9 12v16l-8-4V20L8 8z" />
+              </svg>
+            </div>
+            <h3 class="feature-title">Сбор лидов со всех каналов</h3>
+            <p class="feature-desc">
+              Автоматический сбор заявок с сайта, соцсетей, рекламных кабинетов
+              и мессенджеров. Все данные попадают в единую воронку.
+            </p>
+            <div class="feature-stat">
+              <span class="stat-number blue-text">50+</span>
+              <span class="stat-label">источников</span>
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon cyan">
+              <svg
+                width="48"
+                height="48"
+                viewBox="0 0 48 48"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="24" r="4" />
+                <circle cx="36" cy="12" r="4" />
+                <circle cx="36" cy="36" r="4" />
+                <line x1="16" y1="22" x2="32" y2="14" />
+                <line x1="16" y1="26" x2="32" y2="34" />
+              </svg>
+            </div>
+            <h3 class="feature-title">Умное распределение</h3>
+            <p class="feature-desc">
+              Автоматическое назначение ответственных по правилам: по источнику,
+              географии, загрузке менеджеров. Никакой ручной работы.
+            </p>
+            <div class="feature-stat">
+              <span class="stat-number cyan-text">3×</span>
+              <span class="stat-label">быстрее обработка</span>
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon teal">
+              <svg
+                width="48"
+                height="48"
+                viewBox="0 0 48 48"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="6" y="28" width="8" height="14" rx="1" />
+                <rect x="20" y="18" width="8" height="24" rx="1" />
+                <rect x="34" y="8" width="8" height="34" rx="1" />
+              </svg>
+            </div>
+            <h3 class="feature-title">Аналитика в реальном времени</h3>
+            <p class="feature-desc">
+              Отслеживайте конверсию по каждому каналу, анализируйте
+              эффективность менеджеров, принимайте решения на основе данных.
+            </p>
+            <div class="feature-stat">
+              <span class="stat-number teal-text">+35%</span>
+              <span class="stat-label">к конверсии</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== DASHBOARD ===== -->
+    <section class="dashboard" id="dashboard">
+      <div class="container">
+        <div class="dashboard-grid">
+          <div class="dashboard-text">
+            <p class="eyebrow cyan">ДАШБОРД</p>
+            <h2 class="section-title">Вся аналитика на одном экране</h2>
+            <p class="section-subtitle">
+              Визуальная воронка продаж, графики конверсии по каналам, загрузка
+              команды и ключевые метрики — всё в реальном времени.
+            </p>
+            <ul class="checklist">
+              <li>
+                <svg width="20" height="20" viewBox="0 0 20 20">
+                  <circle cx="10" cy="10" r="10" fill="#E0F2F1" />
+                  <path
+                    d="M6 10l3 3 5-5"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Воронка продаж с этапами
+              </li>
+              <li>
+                <svg width="20" height="20" viewBox="0 0 20 20">
+                  <circle cx="10" cy="10" r="10" fill="#E0F2F1" />
+                  <path
+                    d="M6 10l3 3 5-5"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Конверсия по источникам
+              </li>
+              <li>
+                <svg width="20" height="20" viewBox="0 0 20 20">
+                  <circle cx="10" cy="10" r="10" fill="#E0F2F1" />
+                  <path
+                    d="M6 10l3 3 5-5"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Загрузка менеджеров
+              </li>
+              <li>
+                <svg width="20" height="20" viewBox="0 0 20 20">
+                  <circle cx="10" cy="10" r="10" fill="#E0F2F1" />
+                  <path
+                    d="M6 10l3 3 5-5"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                ROI рекламных кампаний
+              </li>
+            </ul>
+            <a href="#pricing" class="link-arrow">Узнать больше →</a>
+          </div>
+          <div class="dashboard-img-wrapper">
+            <img
+              src="images/dashboard-card.jpg"
+              alt="Аналитика воронки продаж"
+              class="dashboard-img dashboard-float"
+            />
+          </div>
+        </div>
+        <div class="dashboard-full">
+          <img
+            src="images/dashboard-overview.jpg"
+            alt="Полный дашборд Лидосток"
+            class="dashboard-img"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== HOW IT WORKS ===== -->
+    <section class="how-it-works" id="howitworks">
+      <div class="container">
+        <div class="section-header text-center">
+          <p class="eyebrow">КАК ЭТО РАБОТАЕТ</p>
+          <h2 class="section-title">Три шага до первой сделки</h2>
+        </div>
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-number">01</div>
+            <p class="step-label">ШАГ 1</p>
+            <h3>Подключите каналы</h3>
+            <p>
+              Telegram, WhatsApp, Instagram, VK — все мессенджеры и CRM
+              подключаются за минуты. Без программистов.
+            </p>
+          </div>
+          <div class="step-connector"></div>
+          <div class="step-card">
+            <div class="step-number">02</div>
+            <p class="step-label">ШАГ 2</p>
+            <h3>Все заявки в одном окне</h3>
+            <p>
+              Лидосток собирает все сообщения в вашей CRM. Ничего не теряется —
+              каждая заявка готова к обработке.
+            </p>
+          </div>
+          <div class="step-connector"></div>
+          <div class="step-card">
+            <div class="step-number">03</div>
+            <p class="step-label">ШАГ 3</p>
+            <h3>Обрабатывайте с полной картиной</h3>
+            <p>
+              Каждый лид приходит с разбивкой: Кто, Откуда, Чего хочет, Контакт.
+              Менеджер видит всё сразу.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== INTEGRATIONS ===== -->
+    <section class="integrations" id="integrations">
+      <div class="container">
+        <div class="section-header text-center">
+          <p class="eyebrow cyan">ИНТЕГРАЦИИ</p>
+          <h2 class="section-title">Подключайте любые источники</h2>
+          <p class="section-subtitle">
+            50+ готовых интеграций и открытый API для кастомных подключений.
+          </p>
+        </div>
+        <div class="integrations-grid">
+          <div class="integration-card">
+            <div class="int-icon">W</div>
+            <div><strong>WhatsApp</strong><small>Мессенджеры</small></div>
+          </div>
+          <div class="integration-card">
+            <div class="int-icon">T</div>
+            <div><strong>Telegram</strong><small>Мессенджеры</small></div>
+          </div>
+          <div class="integration-card">
+            <div class="int-icon">I</div>
+            <div><strong>Instagram</strong><small>Соцсети</small></div>
+          </div>
+          <div class="integration-card">
+            <div class="int-icon">V</div>
+            <div><strong>VK</strong><small>Соцсети</small></div>
+          </div>
+          <div class="integration-card">
+            <div class="int-icon">F</div>
+            <div><strong>Facebook</strong><small>Соцсети</small></div>
+          </div>
+          <div class="integration-card">
+            <div class="int-icon">G</div>
+            <div><strong>Google Ads</strong><small>Реклама</small></div>
+          </div>
+          <div class="integration-card">
+            <div class="int-icon">Я</div>
+            <div><strong>Яндекс.Директ</strong><small>Реклама</small></div>
+          </div>
+          <div class="integration-card">
+            <div class="int-icon">A</div>
+            <div><strong>Avito</strong><small>Объявления</small></div>
+          </div>
+          <div class="integration-card">
+            <div class="int-icon">W</div>
+            <div><strong>Сайт (Webhooks)</strong><small>Веб</small></div>
+          </div>
+          <div class="integration-card">
+            <div class="int-icon">E</div>
+            <div><strong>Email</strong><small>Почта</small></div>
+          </div>
+          <div class="integration-card">
+            <div class="int-icon">B</div>
+            <div><strong>Bitrix24</strong><small>CRM</small></div>
+          </div>
+          <div class="integration-card">
+            <div class="int-icon">C</div>
+            <div><strong>amoCRM</strong><small>CRM</small></div>
+          </div>
+          <div class="integration-card">
+            <div class="int-icon">S</div>
+            <div><strong>Slack</strong><small>Коммуникации</small></div>
+          </div>
+          <div class="integration-card">
+            <div class="int-icon">D</div>
+            <div><strong>Discord</strong><small>Коммуникации</small></div>
+          </div>
+          <div class="integration-card">
+            <div class="int-icon">V</div>
+            <div><strong>Viber</strong><small>Мессенджеры</small></div>
+          </div>
+          <div class="integration-card">
+            <div class="int-icon">T</div>
+            <div><strong>TikTok</strong><small>Соцсети</small></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PRICING ===== -->
+    <section class="pricing" id="pricing">
+      <div class="container">
+        <div class="section-header text-center">
+          <p class="eyebrow">ТАРИФЫ</p>
+          <h2 class="section-title">Прозрачные цены без скрытых платежей</h2>
+          <p class="section-subtitle">
+            Начните бесплатно. Масштабируйтесь по мере роста.
+          </p>
+        </div>
+        <div class="pricing-grid">
+          <div class="pricing-card">
+            <h3>Бизнес</h3>
+            <div class="pricing-price">2 990 <span>₽/мес</span></div>
+            <p class="pricing-desc">Для малого бизнеса и стартапов</p>
+            <ul class="pricing-features">
+              <li>
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="8" fill="#E0F2F1" />
+                  <path
+                    d="M5 8l2 2 4-4"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                До 2 источников лидов
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="8" fill="#E0F2F1" />
+                  <path
+                    d="M5 8l2 2 4-4"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                1 менеджер
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="8" fill="#E0F2F1" />
+                  <path
+                    d="M5 8l2 2 4-4"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Базовая аналитика
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="8" fill="#E0F2F1" />
+                  <path
+                    d="M5 8l2 2 4-4"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Email-уведомления
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="8" fill="#E0F2F1" />
+                  <path
+                    d="M5 8l2 2 4-4"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Поддержка по email
+              </li>
+            </ul>
+            <a href="register.html?plan=start" class="btn btn-outline btn-full"
+              >Выбрать</a
+            >
+          </div>
+          <div class="pricing-card pricing-featured">
+            <div class="pricing-badge">ПОПУЛЯРНЫЙ</div>
+            <h3>Премиум</h3>
+            <div class="pricing-price">7 990 <span>₽/мес</span></div>
+            <p class="pricing-desc">Для растущих компаний</p>
+            <ul class="pricing-features">
+              <li>
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="8" fill="#E0F2F1" />
+                  <path
+                    d="M5 8l2 2 4-4"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                До 7 источников лидов
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="8" fill="#E0F2F1" />
+                  <path
+                    d="M5 8l2 2 4-4"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                5 менеджеров
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="8" fill="#E0F2F1" />
+                  <path
+                    d="M5 8l2 2 4-4"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Расширенная аналитика
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="8" fill="#E0F2F1" />
+                  <path
+                    d="M5 8l2 2 4-4"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Все мессенджеры
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="8" fill="#E0F2F1" />
+                  <path
+                    d="M5 8l2 2 4-4"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                API-доступ
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="8" fill="#E0F2F1" />
+                  <path
+                    d="M5 8l2 2 4-4"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Приоритетная поддержка
+              </li>
+            </ul>
+            <a
+              href="register.html?plan=business"
+              class="btn btn-primary btn-full"
+              >Начать бесплатно</a
+            >
+          </div>
+          <div class="pricing-card">
+            <h3>Корпоративный</h3>
+            <div class="pricing-price">19 990 <span>₽/мес</span></div>
+            <p class="pricing-desc">Для среднего и крупного бизнеса</p>
+            <ul class="pricing-features">
+              <li>
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="8" fill="#E0F2F1" />
+                  <path
+                    d="M5 8l2 2 4-4"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Безлимитные источники
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="8" fill="#E0F2F1" />
+                  <path
+                    d="M5 8l2 2 4-4"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Безлимитные менеджеры
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="8" fill="#E0F2F1" />
+                  <path
+                    d="M5 8l2 2 4-4"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Кастомная аналитика
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="8" fill="#E0F2F1" />
+                  <path
+                    d="M5 8l2 2 4-4"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                White-label решение
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="8" fill="#E0F2F1" />
+                  <path
+                    d="M5 8l2 2 4-4"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Выделенный менеджер
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="8" fill="#E0F2F1" />
+                  <path
+                    d="M5 8l2 2 4-4"
+                    stroke="#009688"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                SLA 99.9%
+              </li>
+            </ul>
+            <a href="contact.html" class="btn btn-outline btn-full"
+              >Связаться с нами</a
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CLOSING CTA ===== -->
+    <section class="closing-cta" id="cta">
+      <div class="container">
+        <div class="cta-box">
+          <p class="cta-slogan">ЛИДЫ В ПОТОК. ПРОДАЖИ В РОСТ.</p>
+          <h2>Превратите хаос сообщений в управляемый поток продаж</h2>
+          <p>Быстрее. Проще. Надёжнее.</p>
+          <form class="cta-form" onsubmit="handleSubmit(event)">
+            <input
+              type="email"
+              id="emailInput"
+              placeholder="Ваш email"
+              required
+            />
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              Начать бесплатно
+            </button>
+          </form>
+          <p class="cta-note">14 дней бесплатно. Без привязки карты.</p>
+          <div class="cta-success" id="ctaSuccess">
+            <p>
+              <strong>Спасибо!</strong> Мы отправили вам письмо с дальнейшими
+              инструкциями.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="logo">
+              <img
+                src="images/logo-light.png"
+                alt="Лидосток"
+                class="logo-img"
+              />
+            </div>
+            <p>Единая система для сбора, распределения и аналитики лидов.</p>
+            <p
+              style="
+                margin-top: 8px;
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 0.15em;
+                color: var(--blue);
+              "
+            >
+              ЛИДЫ В ПОТОК. ПРОДАЖИ В РОСТ.
+            </p>
+          </div>
+          <div class="footer-col">
+            <h4>ПРОДУКТ</h4>
+            <a href="#features">Возможности</a>
+            <a href="#integrations">Интеграции</a>
+            <a href="#pricing">Тарифы</a>
+            <a href="soon.html?page=api">API</a>
+          </div>
+          <div class="footer-col">
+            <h4>КОМПАНИЯ</h4>
+            <a href="about.html">О нас</a>
+            <a href="blog.html">Блог</a>
+            <a href="soon.html?page=careers">Карьера</a>
+            <a href="contact.html">Контакты</a>
+          </div>
+          <div class="footer-col">
+            <h4>ПОДДЕРЖКА</h4>
+            <a href="soon.html?page=help">Помощь</a>
+            <a href="soon.html?page=docs">Документация</a>
+            <a href="soon.html?page=status">Статус системы</a>
+            <a href="soon.html?page=security">Безопасность</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2026 Лидосток. Все права защищены.</p>
+          <div>
+            <a href="privacy.html">Политика конфиденциальности</a>
+            <a href="terms.html">Условия использования</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
