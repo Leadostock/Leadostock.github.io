@@ -180,8 +180,11 @@ const API_BASE = '';
 // Демо-аккаунты — резервный вход для локального просмотра панели,
 // когда бэкенд ещё не запущен. После деплоя бэкенда работает реальная авторизация.
 const DEMO_ACCOUNTS = {
-  admin:  { password: 'admin',  role: 'admin',    name: 'Администратор системы' },
-  bisnes: { password: 'bisnes', role: 'business', name: 'Алексей Петров' }
+  admin:   { password: 'admin',   role: 'admin',    name: 'Администратор системы' },
+  bisnes:  { password: 'bisnes',  role: 'business', name: 'Алексей Петров', plan: 'Бизнес',  company: 'ООО «СтройМастер»' },
+  premium: { password: 'premium', role: 'business', name: 'Ольга Ветрова', plan: 'Премиум', company: 'Агентство «Медиалайн»' },
+  trial:   { password: 'trial',   role: 'business', name: 'Никита Пробный', plan: 'Бесплатный', company: 'ИП Новиков', trialDays: 9 },
+  expired: { password: 'expired', role: 'business', name: 'Роман Истёк',   plan: 'Бесплатный', company: 'ООО «Пробникофф»', trialDays: -1 }
 };
 
 async function handleLoginSubmit(event) {
@@ -239,9 +242,15 @@ async function handleLoginSubmit(event) {
   // 2) Демо-фоллбэк (только когда бэкенд недоступен) — для локального просмотра
   const account = DEMO_ACCOUNTS[login.toLowerCase()];
   if (account && account.password === password) {
-    localStorage.setItem('lidostok_session', JSON.stringify({
-      role: account.role, name: account.name, login: login.toLowerCase(), at: Date.now()
-    }));
+    const session = {
+      role: account.role, name: account.name, login: login.toLowerCase(),
+      plan: account.plan || null, company: account.company || null, at: Date.now()
+    };
+    // Дата окончания пробного периода (для демо трактуем trialDays как «осталось дней»)
+    if (typeof account.trialDays === 'number') {
+      session.trial_ends = Date.now() + account.trialDays * 86400000;
+    }
+    localStorage.setItem('lidostok_session', JSON.stringify(session));
     window.location.assign('dashboard.html');
     return false;
   }
@@ -379,3 +388,33 @@ document.addEventListener('DOMContentLoaded', () => {
   initSoonPage();
   window.addEventListener('scroll', handleHeaderScroll);
 });
+
+// ===== ПЕРЕКЛЮЧАТЕЛЬ ПЕРИОДА ОПЛАТЫ НА ЛЕНДИНГЕ =====
+function initBillingSwitch() {
+  const sw = document.getElementById('billingSwitch');
+  if (!sw) return;
+  const DISCOUNTS = { 1: 0, 3: 0.10, 6: 0.15, 12: 0.30 };
+  const fmt = (n) => n.toLocaleString('ru-RU');
+  sw.querySelectorAll('.billing-opt').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      sw.querySelectorAll('.billing-opt').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      const months = parseInt(btn.dataset.months, 10);
+      const d = DISCOUNTS[months] || 0;
+      document.querySelectorAll('.pricing-card .price-num').forEach((el) => {
+        const base = parseInt(el.dataset.month, 10);
+        el.textContent = fmt(Math.round(base * (1 - d)));
+        const sub = el.closest('.pricing-card').querySelector('[data-sub]');
+        if (sub) {
+          if (months > 1) {
+            const total = Math.round(base * months * (1 - d));
+            sub.textContent = `${fmt(total)} ₽ за ${months} мес · экономия ${Math.round(d * 100)}%`;
+          } else {
+            sub.textContent = '';
+          }
+        }
+      });
+    });
+  });
+}
+document.addEventListener('DOMContentLoaded', initBillingSwitch);

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Блог — Лидосток</title>
+  <title>Конструктор подписки — Лидосток</title>
   <link rel="icon" type="image/png" href="images/logo-dark.png">
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -38,59 +38,19 @@
     <a href="about.html" class="mobile-link" onclick="toggleMenu()">О нас</a>
     <a href="blog.html" class="mobile-link" onclick="toggleMenu()">Блог</a>
     <a href="index.html#pricing" class="mobile-link" onclick="toggleMenu()">Тарифы</a>
-    <a href="contact.html" class="mobile-link" onclick="toggleMenu()">Контакты</a>
     <a href="login.html" class="mobile-link" onclick="toggleMenu()">Войти</a>
     <a href="register.html" class="btn btn-primary" onclick="toggleMenu()">Начать бесплатно</a>
   </div>
 
-  <!-- ===== BLOG ===== -->
-  <main class="blog-main">
+  <!-- ===== CALCULATOR ===== -->
+  <main class="calc-main">
     <div class="container">
-      <div class="section-header text-center" style="max-width:640px;margin:0 auto 48px;">
-        <p class="eyebrow" style="text-align:center;">БЛОГ</p>
-        <h1 class="section-title">Новости и материалы Лидостока</h1>
-        <p class="section-subtitle" style="margin:0 auto;">Кейсы, советы по работе с лидами и обновления продукта.</p>
+      <div class="section-header text-center" style="max-width:640px;margin:0 auto 40px;">
+        <p class="eyebrow" style="text-align:center;">КОНСТРУКТОР ПОДПИСКИ</p>
+        <h1 class="section-title">Соберите тариф под себя</h1>
+        <p class="section-subtitle" style="margin:0 auto;">Стартовый пакет — от 3 000 ₽/мес. Добавляйте каналы и возможности — стоимость посчитается сразу.</p>
       </div>
-
-      <!-- Featured: Instagram -->
-      <article class="blog-featured">
-        <div class="blog-featured-text">
-          <span class="blog-tag">Сообщество</span>
-          <h2>Подписывайтесь на нас в Instagram</h2>
-          <p>
-            Мы запустили Instagram <strong>@leadostok78</strong> — там будут кейсы клиентов,
-            короткие советы по работе с заявками из мессенджеров и анонсы новых интеграций.
-            Наведите камеру телефона на QR-код или нажмите кнопку ниже.
-          </p>
-          <a href="https://www.instagram.com/leadostok78?igsh=MWFjbGg2ejFyN282aQ%3D%3D&utm_source=qr" target="_blank" rel="noopener" class="btn btn-primary btn-lg">Перейти в Instagram</a>
-        </div>
-        <div class="blog-featured-qr">
-          <img src="images/instagram-qr.jpg" alt="QR-код Instagram @leadostok78">
-          <span>@leadostok78</span>
-        </div>
-      </article>
-
-      <!-- Upcoming posts -->
-      <div class="blog-grid">
-        <article class="blog-card">
-          <div class="blog-card-badge">Скоро</div>
-          <h3>Как перестать терять заявки из мессенджеров</h3>
-          <p>Разбираем, почему обращения теряются и как единый инбокс закрывает эту проблему.</p>
-          <span class="blog-card-meta">Готовим материал</span>
-        </article>
-        <article class="blog-card">
-          <div class="blog-card-badge">Скоро</div>
-          <h3>Telegram, VK и почта: что подключить первым</h3>
-          <p>Сравниваем каналы по скорости подключения и объёму входящих заявок.</p>
-          <span class="blog-card-meta">Готовим материал</span>
-        </article>
-        <article class="blog-card">
-          <div class="blog-card-badge">Скоро</div>
-          <h3>Аналитика лидов: какие метрики важны</h3>
-          <p>Время первого ответа, источники, нагрузка на менеджеров — и что с этим делать.</p>
-          <span class="blog-card-meta">Готовим материал</span>
-        </article>
-      </div>
+      <div class="calc-layout" id="calcApp"><!-- рендерится в calculator.js --></div>
     </div>
   </main>
 
@@ -99,9 +59,7 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <div class="logo">
-            <img src="images/logo-light.png" alt="Лидосток" class="logo-img">
-          </div>
+          <div class="logo"><img src="images/logo-light.png" alt="Лидосток" class="logo-img"></div>
           <p>Единая система для сбора, распределения и аналитики лидов.</p>
           <p style="margin-top:8px;font-size:12px;font-weight:700;letter-spacing:0.15em;color:var(--blue);">ЛИДЫ В ПОТОК. ПРОДАЖИ В РОСТ.</p>
         </div>
@@ -110,7 +68,7 @@
           <a href="index.html#features">Возможности</a>
           <a href="index.html#integrations">Интеграции</a>
           <a href="index.html#pricing">Тарифы</a>
-          <a href="soon.html?page=api">API</a>
+          <a href="calculator.html">Конструктор</a>
         </div>
         <div class="footer-col">
           <h4>КОМПАНИЯ</h4>
@@ -138,6 +96,7 @@
   </footer>
 
   <script src="script.js"></script>
+  <script src="calculator.js"></script>
   <script src="cookie.js"></script>
 </body>
 </html>

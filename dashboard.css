@@ -1082,3 +1082,101 @@ select.inp { cursor: pointer; appearance: none; background-image: url("data:imag
 
 .pay-spinner { width: 42px; height: 42px; margin: 6px auto 0; border: 3px solid var(--d-border); border-top-color: var(--d-blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===================================================================
+   Панель фильтров лидов + профиль/выход в сайдбаре
+   =================================================================== */
+.filter-bar {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 14px 0 18px; margin-bottom: 4px; border-bottom: 1px solid var(--d-border-soft);
+}
+.filter-group { display: flex; align-items: center; gap: 8px; }
+.filter-label { font-size: 12px; color: var(--d-text-muted); white-space: nowrap; }
+.filter-spacer { flex: 1; }
+.inp-sm { padding: 7px 30px 7px 12px; font-size: 13px; width: auto; min-width: 150px; }
+
+/* профиль в сайдбаре — кликабельный, ведёт в настройки */
+.sidebar-user { flex-direction: column; align-items: stretch; gap: 8px; }
+.user-profile {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  background: none; border: 1px solid transparent; border-radius: 10px;
+  padding: 8px; text-align: left; transition: background 0.15s, border-color 0.15s;
+}
+.user-profile:hover { background: var(--d-surface); border-color: var(--d-border); }
+.sidebar-exit {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 10px; border-radius: 10px; font-size: 14px; font-weight: 600;
+  background: var(--d-surface); border: 1px solid var(--d-border); color: var(--d-text-2);
+  transition: all 0.15s;
+}
+.sidebar-exit svg { width: 17px; height: 17px; }
+.sidebar-exit:hover { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.3); color: #FCA5A5; }
+
+/* ===== Тарифы (админ) и SaaS-аналитика ===== */
+.discount-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.discount-cell {
+  display: flex; flex-direction: column; gap: 4px; padding: 16px 18px;
+  background: var(--d-surface); border: 1px solid var(--d-border); border-radius: 12px;
+}
+.discount-cell span { font-size: 13px; color: var(--d-text-2); }
+.discount-cell strong { font-size: 22px; font-weight: 800; color: var(--d-blue-light); }
+
+.saas-placeholder { display: flex; flex-direction: column; gap: 2px; }
+.ph-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 0; border-bottom: 1px solid var(--d-border-soft); font-size: 14px; color: var(--d-text-2);
+}
+.ph-row:last-child { border-bottom: none; }
+.ph-row strong { color: var(--d-text); font-size: 15px; font-variant-numeric: tabular-nums; }
+.panel-head .tag { font-size: 11px; }
+
+@media (max-width: 640px) { .discount-grid { grid-template-columns: 1fr; } }
+
+/* Cookie-баннер в тёмной панели */
+.cookie-banner { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 300;
+  background: var(--d-bg-2); border: 1px solid var(--d-border); border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5); opacity: 0; transform: translateY(16px); transition: all 0.3s; }
+.cookie-banner.show { opacity: 1; transform: none; }
+.cookie-inner { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; justify-content: space-between; padding: 16px 20px; }
+.cookie-text { font-size: 13.5px; color: var(--d-text-2); margin: 0; flex: 1; min-width: 260px; line-height: 1.5; }
+.cookie-text a { color: var(--d-blue-light); font-weight: 600; }
+.cookie-actions { display: flex; gap: 10px; }
+.cookie-btn { padding: 9px 16px; border-radius: 10px; font-size: 13.5px; font-weight: 600; font-family: inherit; cursor: pointer; border: 1px solid transparent; }
+.cookie-btn-ghost { background: var(--d-surface); color: var(--d-text-2); border-color: var(--d-border); }
+.cookie-btn-primary { background: var(--d-blue); color: #fff; }
+
+/* ===== Пробный период ===== */
+.plan-pill.trial { background: rgba(245,158,11,0.14); color: var(--d-amber); border: 1px solid rgba(245,158,11,0.3); }
+
+.trial-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  padding: 12px 28px; background: linear-gradient(90deg, rgba(245,158,11,0.16), rgba(245,158,11,0.05));
+  border-bottom: 1px solid rgba(245,158,11,0.25);
+}
+.trial-bar-text { font-size: 13.5px; color: var(--d-text); }
+.trial-bar-text strong { color: var(--d-amber); }
+.trial-bar-btn {
+  padding: 8px 16px; border-radius: 10px; border: none; font-weight: 600; font-size: 13.5px;
+  background: var(--d-amber); color: #1a1205; cursor: pointer; white-space: nowrap; transition: filter 0.15s;
+}
+.trial-bar-btn:hover { filter: brightness(1.08); }
+
+/* экран блокировки после окончания пробного */
+.trial-block { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 32px 20px; grid-column: 1 / -1; }
+.trial-block-card { max-width: 860px; width: 100%; text-align: center; background: var(--d-surface); border: 1px solid var(--d-border); border-radius: 18px; padding: 44px 36px; box-shadow: var(--d-shadow); }
+.tb-icon { width: 64px; height: 64px; margin: 0 auto 20px; border-radius: 50%; background: rgba(245,158,11,0.14); color: var(--d-amber); display: flex; align-items: center; justify-content: center; }
+.tb-icon svg { width: 30px; height: 30px; }
+.trial-block-card h1 { font-size: 26px; font-weight: 800; margin-bottom: 12px; }
+.trial-block-card > p { font-size: 15px; color: var(--d-text-2); line-height: 1.6; max-width: 560px; margin: 0 auto 30px; }
+.tb-plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; text-align: left; }
+.tb-plan { background: var(--d-bg-2); border: 1px solid var(--d-border); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+.tb-plan-name { font-weight: 700; font-size: 16px; }
+.tb-plan-price { font-size: 20px; font-weight: 800; color: var(--d-blue-light); }
+.tb-plan ul { list-style: none; padding: 0; margin: 4px 0 12px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
+.tb-plan li { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--d-text-2); }
+.tb-plan li svg { width: 14px; height: 14px; color: var(--d-green); flex-shrink: 0; }
+.tb-logout { background: none; border: 1px solid var(--d-border); color: var(--d-text-2); padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.tb-logout svg { width: 16px; height: 16px; }
+.tb-logout:hover { background: var(--d-surface-2); color: var(--d-text); }
+
+@media (max-width: 760px) { .tb-plans { grid-template-columns: 1fr; } }
