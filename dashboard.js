@@ -1,0 +1,2044 @@
+/* ===================================================================
+   ЛИДОСТОК — Панель управления (демо-логика на моковых данных)
+   Данные ниже вымышленные. Когда подключим бэкенд, эти массивы заменит
+   реальный fetch к API (/api/conversations, /api/channels, /api/analytics).
+   =================================================================== */
+
+// ---------- Сессия / доступ ----------
+function getSession() {
+  try {
+    return JSON.parse(localStorage.getItem("lidostok_session"));
+  } catch {
+    return null;
+  }
+}
+const SESSION = getSession();
+if (!SESSION) {
+  window.location.href = "login.html";
+}
+const IS_ADMIN = SESSION && SESSION.role === "admin";
+
+// Пробный период (тариф «Бесплатный»)
+const IS_TRIAL = !!SESSION && !IS_ADMIN && SESSION.plan === "Бесплатный";
+function trialDaysLeft() {
+  if (!SESSION || !SESSION.trial_ends) return 14;
+  return Math.ceil((SESSION.trial_ends - Date.now()) / 86400000);
+}
+const TRIAL_EXPIRED = IS_TRIAL && trialDaysLeft() <= 0;
+
+// Роли внутри бизнес-аккаунта: владелец (директор) или менеджер (субдоступ)
+const IS_MANAGER_SEAT = !!SESSION && !IS_ADMIN && SESSION.member === "manager";
+const IS_OWNER = !!SESSION && !IS_ADMIN && !IS_MANAGER_SEAT;
+function planHasManagerControl(plan) {
+  return plan === "Премиум" || plan === "Корпоративный";
+}
+function planManagerLimit(plan) {
+  if (plan === "Корпоративный") return null; // без ограничений
+  if (plan === "Премиум") return 2;
+  return 0; // мультидоступа нет
+}
+function pluralDays(n) {
+  n = Math.abs(n);
+  const a = n % 100, b = n % 10;
+  if (a > 10 && a < 20) return n + " дней";
+  if (b === 1) return n + " день";
+  if (b > 1 && b < 5) return n + " дня";
+  return n + " дней";
+}
+
+function logout() {
+  localStorage.removeItem("lidostok_session");
+  window.location.href = "index.html";
+}
+
+// ---------- Моковые данные ----------
+// Система ТОЛЬКО принимает сообщения — исходящих ответов нет (все messages: dir "in").
+const DATA = {
+  business: {
+    company: "ООО «СтройМастер»",
+    plan: "Бизнес",
+    kpi: {
+      leads: 128,
+      conversion: "18%",
+      avgReply: "4 мин",
+      revenue: "₽1,84 млн",
+    },
+    channels: [
+      { type: "telegram", title: "Бот заявок", status: "active", leads: 61 },
+      {
+        type: "email",
+        title: "sales@stroymaster.ru",
+        status: "active",
+        leads: 44,
+      },
+      { type: "vk", title: "Сообщество ВК", status: "error", leads: 23 },
+    ],
+    conversations: [
+      {
+        id: 1,
+        name: "Иван Иванович",
+        channel: "telegram",
+        time: "2 мин",
+        status: "new",
+        preview: "Хочу записаться на консультацию в пятницу",
+        lead: {
+          who: "Иван Иванович",
+          source: "Telegram-бот · реклама «Скидка 20%»",
+          want: "Записаться на консультацию в эту пятницу",
+          contact: "+7 999 123-45-67 · @ivan_ivanovich",
+        },
+        messages: [
+          {
+            dir: "in",
+            text: "Здравствуйте! Увидел рекламу про скидку 20%",
+            time: "10:02",
+          },
+          {
+            dir: "in",
+            text: "Хочу записаться на консультацию в эту пятницу",
+            time: "10:02",
+          },
+        ],
+      },
+      {
+        id: 2,
+        name: "Мария Смирнова",
+        channel: "email",
+        time: "18 мин",
+        status: "progress",
+        preview: "Тема: Запрос коммерческого предложения",
+        lead: {
+          who: "Мария Смирнова",
+          source: "Email · тема «Запрос КП»",
+          want: "Коммерческое предложение на остекление балкона",
+          contact: "maria@company.ru",
+        },
+        messages: [
+          {
+            dir: "in",
+            text: "Добрый день! Пришлите, пожалуйста, КП на остекление балкона 6 м.",
+            time: "09:46",
+          },
+        ],
+      },
+      {
+        id: 3,
+        name: "VK id20481",
+        channel: "vk",
+        time: "1 ч",
+        status: "new",
+        preview: "Сколько стоит выезд замерщика?",
+        lead: {
+          who: "Дмитрий (VK)",
+          source: "VK · сообщество",
+          want: "Уточнить стоимость выезда замерщика",
+          contact: "vk.com/id20481",
+        },
+        messages: [
+          {
+            dir: "in",
+            text: "Сколько стоит выезд замерщика на район?",
+            time: "09:10",
+          },
+        ],
+      },
+      {
+        id: 4,
+        name: "Анна Кузнецова",
+        channel: "telegram",
+        time: "3 ч",
+        status: "done",
+        preview: "Нужны подоконники, 3 шт",
+        lead: {
+          who: "Анна Кузнецова",
+          source: "Telegram-бот",
+          want: "Заказ подоконников (3 шт)",
+          contact: "@anna_k",
+        },
+        messages: [
+          { dir: "in", text: "Нужны подоконники, 3 шт", time: "08:20" },
+        ],
+      },
+    ],
+    leadsBySource: [
+      { label: "Telegram", value: 61 },
+      { label: "Email", value: 44 },
+      { label: "ВКонтакте", value: 23 },
+    ],
+    leadsByManager: [
+      { label: "Алексей П.", value: 52 },
+      { label: "Ольга С.", value: 41 },
+      { label: "Игорь В.", value: 35 },
+    ],
+    // Менеджеры аккаунта (субдоступ) + показатели для «контроля менеджеров»
+    managers: [
+      { id: 1, name: "Алексей Петров", email: "alexey@medialine.ru", active: true, assigned: 52, done: 38, avgResp: "4 мин", lastActive: "5 мин назад" },
+      { id: 2, name: "Ольга Соколова", email: "olga@medialine.ru", active: true, assigned: 41, done: 29, avgResp: "6 мин", lastActive: "1 ч назад" },
+    ],
+    funnel: [
+      { label: "Заявка", value: "100%" },
+      { label: "Контакт", value: "62%" },
+      { label: "Встреча", value: "38%" },
+      { label: "Сделка", value: "18%" },
+    ],
+    // Накопительная динамика лидов по месяцам (Янв..Дек). На графике покажем только до текущего месяца.
+    monthly: [8, 14, 22, 31, 44, 52, 61, 74, 88, 101, 116, 128],
+  },
+  // Данные для админ-панели (все клиенты системы). Админ может их редактировать.
+  clients: [
+    {
+      company: "ООО «СтройМастер»",
+      plan: "Бизнес",
+      channels: 3,
+      leads: 128,
+      managers: 3,
+      status: "active",
+      joined: "2025-11-02",
+      email: "info@stroymaster.ru",
+    },
+    {
+      company: "Агентство «Медиалайн»",
+      plan: "Премиум",
+      channels: 5,
+      leads: 402,
+      managers: 8,
+      status: "active",
+      joined: "2025-09-14",
+      email: "hello@medialine.ru",
+    },
+    {
+      company: "ИП Соколов А.В.",
+      plan: "Бесплатный",
+      channels: 2,
+      leads: 51,
+      managers: 1,
+      status: "active",
+      joined: "2026-01-20",
+      email: "sokolov@mail.ru",
+    },
+    {
+      company: "ООО «ТехноПрогресс»",
+      plan: "Корпоративный",
+      channels: 7,
+      leads: 1120,
+      managers: 22,
+      status: "active",
+      joined: "2025-06-03",
+      email: "sales@technoprogress.ru",
+    },
+    {
+      company: "Студия «Дизайн77»",
+      plan: "Бизнес",
+      channels: 3,
+      leads: 88,
+      managers: 2,
+      status: "active",
+      joined: "2025-12-11",
+      email: "studio@design77.ru",
+    },
+    {
+      company: "ООО «АвтоЛидер»",
+      plan: "Бесплатный",
+      channels: 2,
+      leads: 60,
+      managers: 1,
+      status: "trial",
+      joined: "2026-02-01",
+      email: "avto@leader.ru",
+    },
+    {
+      company: "Клиника «Здоровье+»",
+      plan: "Премиум",
+      channels: 4,
+      leads: 265,
+      managers: 6,
+      status: "active",
+      joined: "2025-10-08",
+      email: "info@zdorovie.ru",
+    },
+    {
+      company: "ООО «ЛогистикПро»",
+      plan: "Бизнес",
+      channels: 3,
+      leads: 143,
+      managers: 4,
+      status: "suspended",
+      joined: "2025-08-22",
+      email: "op@logisticpro.ru",
+    },
+  ],
+};
+
+const PLAN_OPTIONS = ["Бесплатный", "Бизнес", "Премиум", "Корпоративный"];
+const STATUS_OPTIONS = [
+  ["active", "Активен"],
+  ["trial", "Пробный"],
+  ["suspended", "Приостановлен"],
+];
+
+// Сводка для админа считается из списка клиентов (пересчитывается после правок)
+function recomputeAdminKpi() {
+  const c = DATA.clients;
+  DATA.adminKpi = {
+    clients: c.length,
+    active: c.filter((x) => x.status === "active").length,
+    leads: c.reduce((s, x) => s + Number(x.leads || 0), 0),
+    channels: c.reduce((s, x) => s + Number(x.channels || 0), 0),
+  };
+}
+recomputeAdminKpi();
+
+// Тариф и компания текущего бизнес-пользователя берутся из сессии
+// (нужно для демо премиум-аккаунта, чтобы посмотреть панель их глазами).
+if (SESSION && !IS_ADMIN) {
+  if (SESSION.plan) DATA.business.plan = SESSION.plan;
+  if (SESSION.company) DATA.business.company = SESSION.company;
+}
+
+// Права по тарифу
+function planHasAnalytics(plan) {
+  return plan === "Премиум" || plan === "Корпоративный";
+}
+function planChannelLimit(plan) {
+  if (plan === "Премиум") return 7;
+  if (plan === "Корпоративный") return null; // без ограничений
+  if (plan === "Бизнес") return 3;
+  return 2; // Бесплатный
+}
+function planLeadLimitLabel(plan) {
+  const map = { "Бесплатный": "250", "Бизнес": "1 000", "Премиум": "3 000", "Корпоративный": "Без ограничений" };
+  const v = map[plan] || "1 000";
+  return v === "Без ограничений" ? v : v + " лидов";
+}
+
+// Данные по компаниям: разные клиенты (тенанты) видят РАЗНЫХ лидов.
+// Менеджер видит то же, что владелец его компании (общий инбокс тенанта).
+const _now = new Date();
+const _daysAgoISO = (n) => { const d = new Date(_now); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10); };
+function buildConvs(defs) {
+  let id = 1;
+  return defs.map((e) => ({
+    id: id++, name: e.name, channel: e.channel, time: e.time || "недавно",
+    status: e.status, preview: e.preview, date: _daysAgoISO(e.days),
+    managerId: e.managerId != null ? e.managerId : null,
+    lead: { who: e.who, source: e.source, want: e.want, contact: e.contact },
+    messages: [{ dir: "in", text: e.msg || e.preview, time: e.t || "—" }],
+  }));
+}
+// Имя менеджера, ведущего диалог (из реального API — managerName; иначе по id)
+function managerNameOf(c) {
+  if (!c) return null;
+  if (c.managerName) return c.managerName;
+  const m = DATA.business.managers.find((x) => String(x.id) === String(c.managerId));
+  return m ? m.name : null;
+}
+
+const COMPANY_PROFILES = {
+  "Агентство «Медиалайн»": {
+    kpi: { leads: 282, conversion: "24%", avgReply: "3 мин", revenue: "₽4,10 млн" },
+    channels: [
+      { type: "telegram", title: "Медиалайн Бот", status: "active", leads: 88 },
+      { type: "email", title: "hello@medialine.ru", status: "active", leads: 120 },
+      { type: "vk", title: "Сообщество ВК", status: "active", leads: 74 },
+    ],
+    leadsBySource: [{ label: "Telegram", value: 88 }, { label: "Email", value: 120 }, { label: "ВКонтакте", value: 74 }],
+    leadsByManager: [{ label: "Алексей П.", value: 52 }, { label: "Ольга С.", value: 41 }, { label: "Игорь В.", value: 27 }],
+    managers: [
+      { id: 1, name: "Алексей Петров", email: "alexey@medialine.ru", active: true, assigned: 52, done: 38, avgResp: "4 мин", lastActive: "5 мин назад" },
+      { id: 2, name: "Ольга Соколова", email: "olga@medialine.ru", active: true, assigned: 41, done: 29, avgResp: "6 мин", lastActive: "1 ч назад" },
+    ],
+    defs: [
+      { name: "Максим (маркетолог)", channel: "telegram", status: "new", days: 0, time: "5 мин", managerId: 1, who: "Максим Волошин", source: "Telegram · реклама", want: "Таргет в Instagram для кофейни", contact: "@maxim_smm", msg: "Здравствуйте! Нужен таргет для сети кофеен" },
+      { name: "Ольга Крылова", channel: "email", status: "progress", days: 1, managerId: 2, who: "Ольга Крылова", source: "Email · тема «SMM»", want: "Ведение соцсетей бренда одежды", contact: "olga@brand.ru" },
+      { name: "Салон «Локон»", channel: "vk", status: "new", days: 2, managerId: null, who: "Салон «Локон»", source: "VK · сообщество", want: "Продвижение ВКонтакте", contact: "vk.com/lokon" },
+      { name: "Дмитрий Гущин", channel: "telegram", status: "done", days: 24, managerId: 1, who: "Дмитрий Гущин", source: "Telegram-бот", want: "Реклама фитнес-клуба", contact: "@dg_fit" },
+      { name: "Инна (Бариста)", channel: "email", status: "done", days: 33, managerId: 2, who: "Инна Кофе", source: "Email", want: "Лендинг + контекст", contact: "inna@barista.ru" },
+      { name: "Роман Авто", channel: "vk", status: "done", days: 41, managerId: 1, who: "Роман Авто", source: "VK · сообщество", want: "Ведение сообщества автосервиса", contact: "vk.com/id90210" },
+      { name: "Вера (Цветы)", channel: "telegram", status: "done", days: 55, managerId: 2, who: "Вера Флора", source: "Telegram · реклама", want: "Реклама к 8 марта", contact: "@vera_flowers" },
+      { name: "Клиника «Дент»", channel: "email", status: "done", days: 63, managerId: 1, who: "Клиника Дент", source: "Email", want: "Контекстная реклама", contact: "info@dent.ru" },
+      { name: "Барбершоп «Стайл»", channel: "vk", status: "done", days: 71, managerId: 2, who: "Барбер Стайл", source: "VK · сообщество", want: "Таргет ВК", contact: "vk.com/barberstyle" },
+    ],
+  },
+  "ИП Новиков": {
+    kpi: { leads: 37, conversion: "12%", avgReply: "9 мин", revenue: "₽210 тыс" },
+    channels: [
+      { type: "telegram", title: "Заявки ИП", status: "active", leads: 20 },
+      { type: "email", title: "novikov@mail.ru", status: "active", leads: 12 },
+    ],
+    leadsBySource: [{ label: "Telegram", value: 20 }, { label: "Email", value: 12 }],
+    leadsByManager: [],
+    managers: [],
+    defs: [
+      { name: "Николай (сосед)", channel: "telegram", status: "new", days: 0, time: "12 мин", who: "Николай", source: "Telegram", want: "Починить смеситель на кухне", contact: "@nikolay_d", msg: "Здравствуйте, течёт кран, сможете приехать?" },
+      { name: "Марина П.", channel: "email", status: "progress", days: 2, who: "Марина П.", source: "Email", want: "Сборка шкафа-купе", contact: "marina@mail.ru" },
+      { name: "Пётр Ильич", channel: "telegram", status: "done", days: 28, who: "Пётр Ильич", source: "Telegram", want: "Повесить люстру и карниз", contact: "@petr_i" },
+      { name: "Кафе «Уют»", channel: "email", status: "done", days: 44, who: "Кафе «Уют»", source: "Email", want: "Мелкий ремонт по помещению", contact: "cafe@uyut.ru" },
+    ],
+  },
+};
+
+// Применяем набор данных по компании из сессии (демо-изоляция тенантов).
+(function applyCompanyData() {
+  const profile = COMPANY_PROFILES[SESSION && SESSION.company];
+  if (profile) {
+    DATA.business.channels = profile.channels;
+    DATA.business.kpi = profile.kpi;
+    DATA.business.leadsBySource = profile.leadsBySource;
+    DATA.business.leadsByManager = profile.leadsByManager;
+    DATA.business.managers = profile.managers;
+    DATA.business.conversations = buildConvs(profile.defs);
+  } else {
+    // По умолчанию — «СтройМастер»: даты для существующих лидов + немного истории
+    const recent = [0, 0, 1, 20];
+    DATA.business.conversations.forEach((c, i) => { c.date = _daysAgoISO(recent[i] || 0); });
+    const extra = [
+      { name: "ООО «Ремонт+»", channel: "email", days: 34, want: "Запрос сметы на фасад", who: "Пётр Ремонтов", source: "Email · тема «Смета»", contact: "petr@remontplus.ru", preview: "Нужна смета на фасад" },
+      { name: "Сергей (VK)", channel: "vk", days: 41, want: "Замер окон в офисе", who: "Сергей Волков", source: "VK · сообщество", contact: "vk.com/id77123", preview: "Замер окон в офисе" },
+      { name: "Елена Ткачёва", channel: "telegram", days: 47, want: "Остекление лоджии", who: "Елена Ткачёва", source: "Telegram-бот", contact: "@elena_tk", preview: "Остекление лоджии" },
+      { name: "Игорь Соколов", channel: "email", days: 63, want: "Двери межкомнатные, 4 шт", who: "Игорь Соколов", source: "Email", contact: "igor@mail.ru", preview: "Двери межкомнатные" },
+      { name: "Марина (VK)", channel: "vk", days: 68, want: "Балконный блок под ключ", who: "Марина Лебедева", source: "VK · сообщество", contact: "vk.com/id55021", preview: "Балконный блок" },
+      { name: "Андрей Новиков", channel: "telegram", days: 72, want: "Панорамное остекление", who: "Андрей Новиков", source: "Telegram-бот · реклама", contact: "@andrey_n", preview: "Панорамное остекление" },
+    ];
+    let id = 100;
+    extra.forEach((e) => {
+      DATA.business.conversations.push({
+        id: id++, name: e.name, channel: e.channel, time: "давно", status: "done",
+        preview: e.preview, date: _daysAgoISO(e.days),
+        lead: { who: e.who, source: e.source, want: e.want, contact: e.contact },
+        messages: [{ dir: "in", text: e.preview, time: "—" }],
+      });
+    });
+  }
+})();
+
+// Состояние фильтра лидов
+let LEADS_FILTER = { status: "all", month: "all" };
+const RU_MONTHS = ["январь","февраль","март","апрель","май","июнь","июль","август","сентябрь","октябрь","ноябрь","декабрь"];
+function monthKeyOf(isoDate) { return isoDate ? isoDate.slice(0, 7) : ""; }
+function monthLabel(key) { if (!key) return ""; const [y, m] = key.split("-"); return RU_MONTHS[parseInt(m, 10) - 1] + " " + y; }
+function fmtDate(isoDate) { if (!isoDate) return "—"; const [y, mo, d] = isoDate.split("-"); return `${d}.${mo}.${y}`; }
+function availableMonths() {
+  const set = new Set(DATA.business.conversations.map((c) => monthKeyOf(c.date)).filter(Boolean));
+  return [...set].sort().reverse();
+}
+function getLeads() {
+  let list = DATA.business.conversations.slice();
+  if (LEADS_FILTER.status !== "all") list = list.filter((c) => c.status === LEADS_FILTER.status);
+  if (LEADS_FILTER.month !== "all") list = list.filter((c) => monthKeyOf(c.date) === LEADS_FILTER.month);
+  const rank = { new: 0, progress: 1, done: 2 };
+  list.sort((a, b) => (b.date || "").localeCompare(a.date || "") || (rank[a.status] - rank[b.status]));
+  return list; // новые (свежие) сверху
+}
+
+// Тарифы (совпадают с дефолтами бэкенда app/plans.py).
+// В демо правки хранятся локально; в реальной версии — PATCH /api/admin/tariffs/{plan}.
+let TARIFFS = [
+  { plan: "free", title: "Бесплатный", price_month: 0, trial_days: 14, max_channels: 2, max_leads_per_month: 250, analytics: false, manager_control: false, priority_support: false, onboarding: true, storage_months: 3, max_managers: 0 },
+  { plan: "business", title: "Бизнес", price_month: 2990, trial_days: 0, max_channels: 3, max_leads_per_month: 1000, analytics: false, manager_control: false, priority_support: false, onboarding: true, storage_months: 3, max_managers: 0 },
+  { plan: "premium", title: "Премиум", price_month: 7990, trial_days: 0, max_channels: 7, max_leads_per_month: 3000, analytics: true, manager_control: true, priority_support: true, onboarding: true, storage_months: 12, max_managers: 2 },
+  { plan: "enterprise", title: "Корпоративный", price_month: null, trial_days: 0, max_channels: null, max_leads_per_month: null, analytics: true, manager_control: true, priority_support: true, onboarding: true, storage_months: null, max_managers: null },
+];
+function fmtMoney(v) { return v == null ? "по договору" : v === 0 ? "0 ₽" : Number(v).toLocaleString("ru-RU") + " ₽"; }
+function fmtLimit(v) { return v == null ? "∞" : Number(v).toLocaleString("ru-RU"); }
+function fmtStorage(v) { return v == null ? "∞" : v + " мес"; }
+function yesNo(b) { return b ? '<span class="tag st-new">✓</span>' : '<span class="tag st-done">—</span>'; }
+
+// ---------- Иконки ----------
+const IC = {
+  overview:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>',
+  tariff:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
+  team:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  inbox:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>',
+  leads:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  channels:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49M7.76 16.24a6 6 0 0 1 0-8.49M20.07 3.93a10 10 0 0 1 0 16.14M3.93 20.07a10 10 0 0 1 0-16.14"/></svg>',
+  analytics:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg>',
+  clients:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/></svg>',
+  settings:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  who: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  source:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+  want: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+  contact:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+  logout:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>',
+  search:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>',
+  lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>',
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>',
+  close:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  download:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  check:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>',
+};
+
+const CH_META = {
+  telegram: { label: "Telegram", tag: "tag-tg", logo: "ch-tg", letter: "T" },
+  email: { label: "Email", tag: "tag-email", logo: "ch-email", letter: "@" },
+  vk: { label: "ВКонтакте", tag: "tag-vk", logo: "ch-vk", letter: "VK" },
+  whatsapp: { label: "WhatsApp", tag: "tag-wa", logo: "ch-wa", letter: "W" },
+};
+
+// ---------- Меню (зависит от роли) ----------
+// Админ НЕ видит Инбокс и Лиды — это рабочие инструменты клиента, не администратора.
+function buildMenu() {
+  if (IS_ADMIN) {
+    return [
+      { id: "overview", label: "Обзор", icon: IC.overview },
+      {
+        id: "clients",
+        label: "Клиенты",
+        icon: IC.clients,
+        badge: DATA.clients.length,
+        amber: true,
+      },
+      { id: "channels", label: "Каналы", icon: IC.channels },
+      { id: "analytics", label: "Аналитика", icon: IC.analytics },
+      { id: "tariffs", label: "Тарифы", icon: IC.tariff },
+      { id: "settings", label: "Настройки", icon: IC.settings },
+    ];
+  }
+  // Менеджер (субдоступ) видит только рабочие разделы
+  if (IS_MANAGER_SEAT) {
+    return [
+      { id: "overview", label: "Обзор", icon: IC.overview },
+      { id: "inbox", label: "Инбокс", icon: IC.inbox, badge: 2 },
+      { id: "leads", label: "Лиды", icon: IC.leads },
+      { id: "channels", label: "Каналы", icon: IC.channels },
+    ];
+  }
+  return [
+    { id: "overview", label: "Обзор", icon: IC.overview },
+    { id: "inbox", label: "Инбокс", icon: IC.inbox, badge: 2 },
+    { id: "leads", label: "Лиды", icon: IC.leads },
+    { id: "channels", label: "Каналы", icon: IC.channels },
+    // На пробном тарифе аналитика недоступна — раздел скрыт (апселл в баннере)
+    ...(IS_TRIAL ? [] : [{ id: "analytics", label: "Аналитика", icon: IC.analytics }]),
+    // Менеджеры — на тарифах с контролем менеджеров (Премиум+), только у владельца
+    ...(!IS_TRIAL && planHasManagerControl(DATA.business.plan) ? [{ id: "team", label: "Менеджеры", icon: IC.team }] : []),
+    { id: "settings", label: "Настройки", icon: IC.settings },
+  ];
+}
+
+// ---------- Утилиты рендера ----------
+function planPill() {
+  if (IS_ADMIN)
+    return `<span class="plan-pill admin">${IC.lock}Администратор системы</span>`;
+  if (IS_TRIAL)
+    return `<span class="plan-pill trial">Пробный · осталось ${pluralDays(trialDaysLeft())}</span>`;
+  return `<span class="plan-pill">Тариф «${DATA.business.plan}»</span>`;
+}
+function liveBadge() {
+  return `<span class="live-badge"><span class="live-dot"></span>Онлайн · <span id="liveClock"></span></span>`;
+}
+function barChart(items, max) {
+  const m = max || Math.max(...items.map((i) => i.value));
+  return items
+    .map(
+      (i) => `
+    <div class="bar-row">
+      <div class="bar-label">${i.label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round((i.value / m) * 100)}%"></div></div>
+      <div class="bar-value">${i.value}</div>
+    </div>`,
+    )
+    .join("");
+}
+// График строится ТОЛЬКО до текущего месяца (реальное время), а не до декабря.
+function lineChart(fullSeries) {
+  const monthsAll = [
+    "Янв",
+    "Фев",
+    "Мар",
+    "Апр",
+    "Май",
+    "Июн",
+    "Июл",
+    "Авг",
+    "Сен",
+    "Окт",
+    "Ноя",
+    "Дек",
+  ];
+  const upto = new Date().getMonth(); // 0-based: июль = 6
+  const series = fullSeries.slice(0, upto + 1);
+  const monthLabels = monthsAll.slice(0, upto + 1);
+  const w = 640,
+    h = 200,
+    pad = 24;
+  const max = Math.max(...series, 1);
+  const step = series.length > 1 ? (w - pad * 2) / (series.length - 1) : 0;
+  const pts = series.map((v, i) => [
+    pad + i * step,
+    h - pad - (v / max) * (h - pad * 2),
+  ]);
+  const path = pts
+    .map(
+      (p, i) => (i === 0 ? "M" : "L") + p[0].toFixed(1) + " " + p[1].toFixed(1),
+    )
+    .join(" ");
+  const area =
+    path +
+    ` L ${pts[pts.length - 1][0].toFixed(1)} ${h - pad} L ${pad} ${h - pad} Z`;
+  const labels = pts
+    .map(
+      (p, i) =>
+        `<text x="${p[0]}" y="${h - 6}" fill="#64748B" font-size="10" text-anchor="middle">${monthLabels[i]}</text>`,
+    )
+    .join("");
+  return `<div class="chart-wrap"><svg viewBox="0 0 ${w} ${h}">
+    <defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2196F3" stop-opacity="0.35"/><stop offset="100%" stop-color="#2196F3" stop-opacity="0"/>
+    </linearGradient></defs>
+    <path d="${area}" fill="url(#lg)"/>
+    <path d="${path}" fill="none" stroke="#42A5F5" stroke-width="2.5" stroke-linejoin="round"/>
+    ${pts.map((p) => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.5" fill="#0B1220" stroke="#42A5F5" stroke-width="2"/>`).join("")}
+    ${labels}
+  </svg></div>`;
+}
+function statusTag(s) {
+  const map = {
+    new: ["st-new", "Новый"],
+    progress: ["st-progress", "В работе"],
+    done: ["st-done", "Завершён"],
+  };
+  const [cls, label] = map[s] || map.new;
+  return `<span class="tag ${cls}">${label}</span>`;
+}
+function planTag(p) {
+  const color =
+    p === "Корпоративный"
+      ? "st-new"
+      : p === "Премиум"
+        ? "st-progress"
+        : p === "Бизнес"
+          ? "tag-tg"
+          : "st-done";
+  return `<span class="tag ${color}">${p}</span>`;
+}
+function esc(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// ---------- Представление: Обзор ----------
+function viewOverview() {
+  const b = DATA.business;
+  const kpis = IS_ADMIN
+    ? [
+        ["Компаний в системе", DATA.adminKpi.clients, "+3 за месяц", "up"],
+        ["Активных клиентов", DATA.adminKpi.active, "стабильно", "up"],
+        [
+          "Всего лидов",
+          DATA.adminKpi.leads.toLocaleString("ru-RU"),
+          "+12,4%",
+          "up",
+        ],
+        ["Подключённых каналов", DATA.adminKpi.channels, "+7 за месяц", "up"],
+      ]
+    : [
+        ["Новые лиды", b.kpi.leads, "+12 за неделю", "up"],
+        ["Конверсия", b.kpi.conversion, "+2,1%", "up"],
+        ["Среднее время ответа", b.kpi.avgReply, "−1 мин", "up"],
+        ["Выручка за месяц", b.kpi.revenue, "+8,3%", "up"],
+      ];
+  const kpiHtml = kpis
+    .map(
+      (k) => `
+    <div class="kpi-card">
+      <div class="kpi-label"><span class="kpi-icon">${IC.leads}</span>${k[0]}</div>
+      <div class="kpi-value">${k[1]}</div>
+      <div class="kpi-delta ${k[3]}">${k[2]}</div>
+    </div>`,
+    )
+    .join("");
+
+  const recent = IS_ADMIN ? adminRecentRows() : businessRecentRows();
+
+  return `
+    <div class="kpi-grid">${kpiHtml}</div>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Динамика лидов<span>по ${new Date().getFullYear()} год</span></div>${liveBadge()}</div>
+        ${lineChart(b.monthly)}
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Лиды по источникам</div></div>
+        ${barChart(b.leadsBySource)}
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">${IS_ADMIN ? "Недавно подключённые клиенты" : "Последние лиды"}</div>
+        <button class="btn-d btn-d-ghost btn-d-sm" onclick="switchView('${IS_ADMIN ? "clients" : "leads"}')">Смотреть все</button></div>
+      <table class="table"><tbody>${recent}</tbody></table>
+    </div>`;
+}
+function businessRecentRows() {
+  return DATA.business.conversations
+    .map((c) => {
+      const m = CH_META[c.channel];
+      return `<tr onclick="openLead('${c.id}')" style="cursor:pointer">
+      <td class="cell-strong">${esc(c.lead.who)}</td>
+      <td><span class="tag ${m.tag}">${m.label}</span></td>
+      <td class="cell-muted">${esc(c.lead.want)}</td>
+      <td>${statusTag(c.status)}</td>
+      <td class="cell-muted">${c.time} назад</td>
+    </tr>`;
+    })
+    .join("");
+}
+function adminRecentRows() {
+  return DATA.clients
+    .slice(0, 5)
+    .map(
+      (c, i) => `
+    <tr onclick="openClientEditor(${DATA.clients.indexOf(c)})" style="cursor:pointer">
+      <td class="cell-strong">${esc(c.company)}</td>
+      <td>${planTag(c.plan)}</td>
+      <td class="cell-muted">${c.channels} каналов</td>
+      <td class="cell-muted">${Number(c.leads).toLocaleString("ru-RU")} лидов</td>
+      <td class="cell-muted">${c.joined}</td></tr>`,
+    )
+    .join("");
+}
+
+// ---------- Представление: Инбокс (только приём, без ответов) ----------
+function viewInbox() {
+  const convs = DATA.business.conversations;
+  return `<div class="inbox">
+    <div class="inbox-col">
+      <div class="inbox-col-head">Диалоги <span class="nav-badge">${convs.length}</span></div>
+      <div class="conv-list" id="convList">${convListHtml()}</div>
+    </div>
+    <div class="inbox-col thread" id="threadCol">
+      <div class="thread-body" id="threadBody" style="align-items:center;justify-content:center;color:var(--d-text-muted)">
+        Выберите диалог слева
+      </div>
+    </div>
+    <div class="inbox-col">
+      <div class="inbox-col-head">Карточка лида</div>
+      <div class="lead-card-pane" id="leadPane">
+        <div style="color:var(--d-text-muted);font-size:14px">Здесь появится структурированная заявка</div>
+      </div>
+    </div>
+  </div>`;
+}
+function convListHtml() {
+  return DATA.business.conversations
+    .map((c) => {
+      const m = CH_META[c.channel];
+      return `<div class="conv-item" id="conv-${c.id}" onclick="selectConv('${c.id}')">
+      <div class="conv-top">
+        <span class="conv-name">${esc(c.name)}</span>
+        <span class="tag ${m.tag}">${m.label}</span>
+      </div>
+      <div class="conv-preview">${esc(c.preview)}</div>
+      <div class="conv-meta-row"><span class="conv-time">${c.time} назад</span>${statusTag(c.status)}</div>
+    </div>`;
+    })
+    .join("");
+}
+function selectConv(id) {
+  const c = DATA.business.conversations.find((x) => String(x.id) === String(id));
+  if (!c) return;
+  document
+    .querySelectorAll(".conv-item")
+    .forEach((el) => el.classList.remove("active"));
+  const item = document.getElementById("conv-" + id);
+  if (item) item.classList.add("active");
+
+  const m = CH_META[c.channel];
+  const thread = document.getElementById("threadCol");
+  // Ответов нет — система только принимает сообщения.
+  thread.innerHTML = `
+    <div class="thread-head">
+      <div class="user-avatar" style="width:34px;height:34px;font-size:13px">${esc(c.name[0])}</div>
+      <div><div style="font-weight:600">${esc(c.name)}</div><div style="font-size:12px;color:var(--d-text-muted)"><span class="tag ${m.tag}">${m.label}</span></div></div>
+    </div>
+    <div class="thread-body">${c.messages
+      .map(
+        (msg) => `
+      <div class="bubble in">${esc(msg.text)}<span class="bubble-time">${msg.time}</span></div>`,
+      )
+      .join("")}
+    </div>
+    <div class="thread-note">${IC.lock} Сейчас система только принимает сообщения. Ответы отправляются менеджером напрямую в канале клиента.</div>`;
+
+  const pane = document.getElementById("leadPane");
+  const statusBtns = [
+    ["new", "Новый"],
+    ["progress", "В работу"],
+    ["done", "Завершить"],
+  ]
+    .map(
+      ([s, l]) =>
+        `<button class="btn-d btn-d-ghost btn-d-sm ${c.status === s ? "is-on" : ""}" onclick="setConvStatus('${c.id}','${s}')">${l}</button>`,
+    )
+    .join("");
+  // Кто ведёт клиента (виден директору). Переназначать может владелец на тарифе с контролем.
+  const canAssign = IS_OWNER && planHasManagerControl(DATA.business.plan) && DATA.business.managers.length;
+  const curMgr = managerNameOf(c);
+  let mgrBlock = "";
+  if (planHasManagerControl(DATA.business.plan)) {
+    if (canAssign) {
+      const opts =
+        `<option value="">Не назначен</option>` +
+        DATA.business.managers
+          .map((m) => `<option value="${m.id}" ${String(m.id) === String(c.managerId) ? "selected" : ""}>${esc(m.name)}</option>`)
+          .join("");
+      mgrBlock = `<div class="lead-field-label" style="margin-top:6px">Ведёт менеджер</div>
+        <select class="inp inp-sm" style="width:100%" onchange="assignConvManager('${c.id}', this.value)">${opts}</select>`;
+    } else {
+      mgrBlock = `<div class="lead-field-label" style="margin-top:6px">Ведёт менеджер</div>
+        <div class="mgr-chip" style="display:inline-flex">${curMgr ? esc(curMgr) : "не назначен"}</div>`;
+    }
+  }
+  pane.innerHTML = `
+    ${leadField("who", "Кто", c.lead.who)}
+    ${leadField("source", "Откуда заявка", c.lead.source)}
+    ${leadField("want", "Чего хочет", c.lead.want)}
+    ${leadField("contact", "Контакт", c.lead.contact)}
+    ${mgrBlock}
+    <div class="lead-field-label" style="margin-top:6px">Статус</div>
+    <div class="status-switch">${statusBtns}</div>
+    <button class="btn-d btn-d-primary" style="width:100%;justify-content:center;margin-top:14px" onclick="pushToCrm('${c.id}')">${IC.check} Передать в Bitrix24</button>`;
+}
+function assignConvManager(convId, managerId) {
+  const c = DATA.business.conversations.find((x) => String(x.id) === String(convId));
+  if (!c) return;
+  c.managerId = managerId || null;
+  const m = DATA.business.managers.find((x) => String(x.id) === String(managerId));
+  c.managerName = m ? m.name : null;
+  if (SESSION && SESSION.real && SESSION.token && window.API) {
+    window.API._req("PATCH", "/api/conversations/" + convId + "/assign", { manager_id: managerId || null }).catch((e) =>
+      console.warn("[API] не удалось назначить менеджера:", e.message),
+    );
+  }
+  selectConv(convId);
+  toast(c.managerName ? "Назначен менеджер: " + c.managerName : "Менеджер снят");
+}
+function leadField(icon, label, value) {
+  return `<div class="lead-field">
+    <div class="lead-field-label"><span class="lead-icon">${IC[icon]}</span>${label}</div>
+    <div class="lead-field-value">${esc(value)}</div>
+  </div>`;
+}
+function setConvStatus(id, status) {
+  const c = DATA.business.conversations.find((x) => String(x.id) === String(id));
+  if (!c) return;
+  c.status = status;
+  // Реальная сессия — сохраняем статус в БД (мягко: при ошибке остаёмся на локальном)
+  if (SESSION && SESSION.real && SESSION.token && window.API) {
+    window.API._req("PATCH", "/api/conversations/" + id + "/status", { status }).catch((e) =>
+      console.warn("[API] не удалось сохранить статус:", e.message),
+    );
+  }
+  const list = document.getElementById("convList");
+  if (list) list.innerHTML = convListHtml();
+  const item = document.getElementById("conv-" + id);
+  if (item) item.classList.add("active");
+  selectConv(id);
+  toast("Статус обновлён: " + statusText(status));
+}
+function statusText(s) {
+  return { new: "Новый", progress: "В работе", done: "Завершён" }[s] || s;
+}
+function pushToCrm(id) {
+  const c = DATA.business.conversations.find((x) => x.id === id);
+  toast("Лид «" + (c ? c.lead.who : "") + "» отправлен в Bitrix24 ✓");
+}
+function openLead(id) { /* id может быть строкой (реальный conversation_id) */
+  switchView("inbox");
+  setTimeout(() => selectConv(id), 60);
+}
+
+// ---------- Представление: Лиды ----------
+function viewLeads() {
+  const months = availableMonths();
+  const statusOpts = [["all", "Все статусы"], ["new", "Новые"], ["progress", "В работе"], ["done", "Завершён"]];
+  const monthOpts = [["all", "Все месяцы"], ...months.map((k) => [k, monthLabel(k)])];
+  const expMonthOpts = months.map((k) => `<option value="${k}">${monthLabel(k)}</option>`).join("");
+  return `<div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">Все лиды<span id="leadsCount">${getLeads().length} записей</span></div>
+      <button class="btn-d btn-d-ghost btn-d-sm" onclick="exportLeadsCSV()">${IC.download} Экспорт CSV</button>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-group">
+        <span class="filter-label">Статус</span>
+        <select class="inp inp-sm" id="fltStatus" onchange="applyLeadFilter()">
+          ${statusOpts.map(([v, l]) => `<option value="${v}" ${v === LEADS_FILTER.status ? "selected" : ""}>${l}</option>`).join("")}
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Месяц</span>
+        <select class="inp inp-sm" id="fltMonth" onchange="applyLeadFilter()">
+          ${monthOpts.map(([v, l]) => `<option value="${v}" ${v === LEADS_FILTER.month ? "selected" : ""}>${l}</option>`).join("")}
+        </select>
+      </div>
+      <div class="filter-spacer"></div>
+      <div class="filter-group">
+        <span class="filter-label">Экспорт за месяц</span>
+        <select class="inp inp-sm" id="expMonth">${expMonthOpts}</select>
+        <button class="btn-d btn-d-primary btn-d-sm" onclick="exportLeadsCSV(document.getElementById('expMonth').value)">${IC.download} Скачать</button>
+      </div>
+    </div>
+    <table class="table" id="leadsTable">
+      <thead><tr><th>Дата</th><th>Кто</th><th>Канал</th><th>Источник</th><th>Запрос</th><th>Статус</th>${showMgrCol() ? "<th>Менеджер</th>" : ""}<th>Контакт</th></tr></thead>
+      <tbody id="leadsBody">${leadsRows()}</tbody>
+    </table>
+  </div>`;
+}
+function showMgrCol() {
+  return planHasManagerControl(DATA.business.plan);
+}
+function applyLeadFilter() {
+  LEADS_FILTER.status = document.getElementById("fltStatus").value;
+  LEADS_FILTER.month = document.getElementById("fltMonth").value;
+  const body = document.getElementById("leadsBody");
+  if (body) body.innerHTML = leadsRows();
+  const cnt = document.getElementById("leadsCount");
+  if (cnt) cnt.textContent = getLeads().length + " записей";
+}
+function leadsRows() {
+  const list = getLeads();
+  const cols = showMgrCol() ? 8 : 7;
+  if (!list.length) {
+    return `<tr><td colspan="${cols}" class="cell-muted" style="text-align:center;padding:26px">Нет лидов по выбранным фильтрам</td></tr>`;
+  }
+  return list
+    .map((c) => {
+      const m = CH_META[c.channel];
+      const mgr = managerNameOf(c);
+      const mgrCell = showMgrCol()
+        ? `<td>${mgr ? '<span class="mgr-chip">' + esc(mgr) + "</span>" : '<span class="cell-muted">не назначен</span>'}</td>`
+        : "";
+      return `<tr onclick="openLead('${c.id}')" style="cursor:pointer">
+      <td class="cell-muted">${fmtDate(c.date)}</td>
+      <td class="cell-strong">${esc(c.lead.who)}</td>
+      <td><span class="tag ${m.tag}">${m.label}</span></td>
+      <td class="cell-muted">${esc(c.lead.source)}</td>
+      <td class="cell-muted">${esc(c.lead.want)}</td>
+      <td>${statusTag(c.status)}</td>
+      ${mgrCell}
+      <td class="cell-muted">${esc(c.lead.contact)}</td>
+    </tr>`;
+    })
+    .join("");
+}
+// monthKey задан → экспорт только за месяц; иначе — с учётом активных фильтров экрана
+function exportLeadsCSV(monthKey) {
+  let list;
+  if (monthKey) {
+    list = DATA.business.conversations.filter((c) => monthKeyOf(c.date) === monthKey);
+  } else {
+    list = getLeads();
+  }
+  list = list.slice().sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  const rows = [["Дата", "Кто", "Канал", "Источник", "Запрос", "Статус", "Контакт"]];
+  list.forEach((c) => {
+    rows.push([fmtDate(c.date), c.lead.who, CH_META[c.channel].label, c.lead.source, c.lead.want, statusText(c.status), c.lead.contact]);
+  });
+  const csv = rows.map((r) => r.map((f) => `"${String(f).replace(/"/g, '""')}"`).join(";")).join("\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `leads_lidostok_${monthKey || "all"}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast(monthKey ? `Экспорт за ${monthLabel(monthKey)} выгружен` : "Лиды выгружены в CSV");
+}
+
+// ---------- Представление: Каналы ----------
+function viewChannels() {
+  const limit = IS_ADMIN ? null : planChannelLimit(DATA.business.plan);
+  const limitLabel = limit === null ? "∞" : limit;
+  const canConfigure = IS_ADMIN; // клиенты канал не «настраивают» — только добавляют
+  // Показываем не больше, чем разрешено тарифом (для trial/бесплатного — максимум 2)
+  const visible = limit === null ? DATA.business.channels : DATA.business.channels.slice(0, limit);
+  const atLimit = limit !== null && visible.length >= limit;
+  const canAdd = !atLimit; // на лимите кнопки добавления нет
+  const cards = visible
+    .map((ch, i) => {
+      const m = CH_META[ch.type];
+      const st =
+        ch.status === "active"
+          ? ["st-active", "Активен"]
+          : ch.status === "error"
+            ? ["st-error", "Ошибка подключения"]
+            : ["st-pending", "Ожидает"];
+      return `<div class="channel-card">
+      <div class="channel-card-head">
+        <div class="channel-logo ${m.logo}">${m.letter}</div>
+        <div><div style="font-weight:600">${m.label}</div><div style="font-size:13px;color:var(--d-text-2)">${esc(ch.title)}</div></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:13px" class="${st[0]}">● ${st[1]}</span>
+        <span style="font-size:13px;color:var(--d-text-2)">${ch.leads} лидов</span>
+      </div>
+      ${canConfigure ? `<button class="btn-d btn-d-ghost btn-d-sm" style="justify-content:center" onclick="openChannelConfig(${i})">${IC.edit} Настроить</button>` : ""}
+    </div>`;
+    })
+    .join("");
+  const addCard = canAdd
+    ? `<div class="channel-card ch-add" onclick="openAddChannel()">
+    <div style="font-size:32px;line-height:1">+</div>
+    <div style="font-weight:600">Подключить канал</div>
+    <div style="font-size:12px">WhatsApp, Instagram и другие</div>
+  </div>`
+    : "";
+  const addBtn = canAdd
+    ? `<button class="btn-d btn-d-primary btn-d-sm" onclick="openAddChannel()">${IC.plus} Добавить канал</button>`
+    : `<span class="tag st-pending">Лимит тарифа достигнут</span>`;
+  return `<div class="panel" style="margin-bottom:16px">
+      <div class="panel-head"><div class="panel-title">Каналы<span>использовано ${visible.length} из ${limitLabel} по тарифу</span></div>
+        ${addBtn}</div>
+      <p style="color:var(--d-text-2);font-size:14px;margin:0">Все входящие сообщения из подключённых каналов попадают в общий инбокс. Подключение и настройку берём на себя — помогаем настроить «под ключ».</p>
+    </div>
+    <div class="channel-grid">${cards}${addCard}</div>`;
+}
+function openChannelConfig(i) {
+  const ch = DATA.business.channels[i];
+  const m = CH_META[ch.type];
+  openModal(
+    `Настройка канала · ${m.label}`,
+    `
+    ${field("Название", `<input class="inp" id="chTitle" value="${esc(ch.title)}">`)}
+    ${field(
+      "Статус",
+      selectHtml(
+        "chStatus",
+        [
+          ["active", "Активен"],
+          ["error", "Ошибка"],
+          ["pending", "Ожидает"],
+          ["disabled", "Отключён"],
+        ],
+        ch.status,
+      ),
+    )}
+    <p class="modal-hint">В демо-режиме изменения сохраняются локально. После подключения бэкенда здесь будут реальные данные канала.</p>
+  `,
+    `
+    <button class="btn-d btn-d-ghost" onclick="closeModal()">Отмена</button>
+    <button class="btn-d btn-d-primary" onclick="saveChannelConfig(${i})">${IC.check} Сохранить</button>
+  `,
+  );
+}
+function saveChannelConfig(i) {
+  const ch = DATA.business.channels[i];
+  ch.title = document.getElementById("chTitle").value.trim() || ch.title;
+  ch.status = document.getElementById("chStatus").value;
+  closeModal();
+  switchView("channels");
+  toast("Канал обновлён");
+}
+function openAddChannel() {
+  const limit = IS_ADMIN ? null : planChannelLimit(DATA.business.plan);
+  if (limit !== null && DATA.business.channels.length >= limit) {
+    openModal(
+      "Лимит каналов",
+      `
+      <p class="modal-hint">На тарифе «${DATA.business.plan}» доступно до ${limit} каналов. Чтобы подключить больше — перейдите на «Премиум» или «Корпоративный».</p>`,
+      `
+      <button class="btn-d btn-d-ghost" onclick="closeModal()">Закрыть</button>
+      <button class="btn-d btn-d-primary" onclick="closeModal(); switchView('settings')">Сменить тариф</button>`,
+    );
+    return;
+  }
+  openModal(
+    "Подключить канал",
+    `
+    ${field(
+      "Тип канала",
+      selectHtml(
+        "newChType",
+        [
+          ["telegram", "Telegram"],
+          ["email", "Email"],
+          ["vk", "ВКонтакте"],
+          ["whatsapp", "WhatsApp"],
+        ],
+        "telegram",
+      ),
+    )}
+    ${field("Название", `<input class="inp" id="newChTitle" placeholder="Например: Бот заявок">`)}
+    <p class="modal-hint">Мы поможем настроить канал «под ключ» — вам не нужно разбираться с API.</p>
+  `,
+    `
+    <button class="btn-d btn-d-ghost" onclick="closeModal()">Отмена</button>
+    <button class="btn-d btn-d-primary" onclick="saveNewChannel()">${IC.plus} Добавить</button>
+  `,
+  );
+}
+function saveNewChannel() {
+  const type = document.getElementById("newChType").value;
+  const title =
+    document.getElementById("newChTitle").value.trim() || CH_META[type].label;
+  DATA.business.channels.push({ type, title, status: "pending", leads: 0 });
+  closeModal();
+  switchView("channels");
+  toast("Канал добавлен и ожидает настройки");
+}
+
+// ---------- Представление: Аналитика (в реальном времени) ----------
+function viewAnalytics() {
+  if (IS_ADMIN) return adminAnalytics(); // SaaS-метрики по нашим клиентам
+  const hasAnalytics = planHasAnalytics(DATA.business.plan);
+  if (!hasAnalytics) {
+    return `<div class="locked">
+      <div class="locked-icon">${IC.lock}</div>
+      <h3>Аналитика доступна на тарифе «Премиум»</h3>
+      <p>Расширенные дашборды, воронка продаж и контроль менеджеров открываются на тарифе Премиум и выше.</p>
+      <button class="btn-d btn-d-primary" onclick="switchView('settings')">Обновить тариф</button>
+    </div>`;
+  }
+  const b = DATA.business;
+  return `
+  <div class="panel" style="margin-bottom:16px">
+    <div class="panel-head"><div class="panel-title">Динамика лидов<span>обновляется в реальном времени</span></div>${liveBadge()}</div>
+    ${lineChart(b.monthly)}
+  </div>
+  <div class="grid-2">
+    <div class="panel"><div class="panel-head"><div class="panel-title">Лиды по источникам</div></div>${barChart(b.leadsBySource)}</div>
+    <div class="panel"><div class="panel-head"><div class="panel-title">Нагрузка на менеджеров</div></div>${barChart(b.leadsByManager)}</div>
+  </div>
+  <div class="panel"><div class="panel-head"><div class="panel-title">Воронка продаж</div></div>
+    <div class="funnel">${b.funnel.map((f, i) => `<div class="funnel-step" style="width:${100 - i * 20}%"><span>${f.label}</span><small>${f.value}</small></div>`).join("")}</div>
+  </div>`;
+}
+
+// ---------- Представление: Клиенты (только админ) ----------
+function viewClients() {
+  return `
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-label">Всего компаний</div><div class="kpi-value">${DATA.adminKpi.clients}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Активных</div><div class="kpi-value">${DATA.adminKpi.active}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Лидов всего</div><div class="kpi-value">${DATA.adminKpi.leads.toLocaleString("ru-RU")}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Каналов подключено</div><div class="kpi-value">${DATA.adminKpi.channels}</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Все клиенты системы<span>только для администратора</span></div>
+        <div class="panel-head-actions">
+          <div class="search-box" style="width:220px"><input placeholder="Поиск компании..." oninput="filterClients(this.value)"></div>
+          <button class="btn-d btn-d-primary btn-d-sm" onclick="openClientEditor(-1)">${IC.plus} Добавить</button>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table class="table" id="clientsTable">
+          <thead><tr><th>Компания</th><th>Тариф</th><th>Каналы</th><th>Лиды</th><th>Менеджеры</th><th>Статус</th><th>С нами с</th><th></th></tr></thead>
+          <tbody>${clientRows()}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+function clientRows() {
+  return DATA.clients
+    .map((c, i) => {
+      const st =
+        c.status === "active"
+          ? ["st-active", "Активен"]
+          : c.status === "trial"
+            ? ["st-pending", "Пробный"]
+            : ["st-error", "Приостановлен"];
+      return `<tr>
+      <td class="cell-strong">${esc(c.company)}</td>
+      <td>${planTag(c.plan)}</td>
+      <td class="cell-muted">${c.channels}</td>
+      <td class="cell-muted">${Number(c.leads).toLocaleString("ru-RU")}</td>
+      <td class="cell-muted">${c.managers}</td>
+      <td><span class="${st[0]}" style="font-size:13px">● ${st[1]}</span></td>
+      <td class="cell-muted">${c.joined}</td>
+      <td><button class="btn-d btn-d-ghost btn-d-sm" onclick="openClientEditor(${i})">${IC.edit} Изменить</button></td>
+    </tr>`;
+    })
+    .join("");
+}
+function filterClients(q) {
+  q = (q || "").toLowerCase();
+  document.querySelectorAll("#clientsTable tbody tr").forEach((tr) => {
+    tr.style.display = tr.textContent.toLowerCase().includes(q) ? "" : "none";
+  });
+}
+// Редактор аккаунта клиента (i === -1 → создание новой компании)
+function openClientEditor(i) {
+  const isNew = i < 0;
+  const c = isNew
+    ? {
+        company: "",
+        plan: "Бесплатный",
+        channels: 2,
+        leads: 0,
+        managers: 1,
+        status: "trial",
+        joined: new Date().toISOString().slice(0, 10),
+        email: "",
+      }
+    : DATA.clients[i];
+  openModal(
+    isNew ? "Новая компания" : "Аккаунт клиента",
+    `
+    ${field("Название компании", `<input class="inp" id="clCompany" value="${esc(c.company)}" placeholder="ООО «Компания»">`)}
+    ${field("Email для связи", `<input class="inp" id="clEmail" value="${esc(c.email || "")}" placeholder="info@company.ru">`)}
+    <div class="form-2col">
+      ${field(
+        "Тариф",
+        selectHtml(
+          "clPlan",
+          PLAN_OPTIONS.map((p) => [p, p]),
+          c.plan,
+        ),
+      )}
+      ${field("Статус", selectHtml("clStatus", STATUS_OPTIONS, c.status))}
+    </div>
+    <div class="form-2col">
+      ${field("Каналов", `<input class="inp" id="clChannels" type="number" min="0" value="${c.channels}">`)}
+      ${field("Менеджеров", `<input class="inp" id="clManagers" type="number" min="0" value="${c.managers}">`)}
+    </div>
+    ${field("Лидов всего", `<input class="inp" id="clLeads" type="number" min="0" value="${c.leads}">`)}
+  `,
+    `
+    ${isNew ? "" : `<button class="btn-d btn-d-danger" onclick="deleteClient(${i})">Удалить</button>`}
+    <div style="flex:1"></div>
+    <button class="btn-d btn-d-ghost" onclick="closeModal()">Отмена</button>
+    <button class="btn-d btn-d-primary" onclick="saveClient(${i})">${IC.check} Сохранить</button>
+  `,
+  );
+}
+function saveClient(i) {
+  const data = {
+    company: document.getElementById("clCompany").value.trim(),
+    email: document.getElementById("clEmail").value.trim(),
+    plan: document.getElementById("clPlan").value,
+    status: document.getElementById("clStatus").value,
+    channels: Math.max(
+      0,
+      parseInt(document.getElementById("clChannels").value) || 0,
+    ),
+    managers: Math.max(
+      0,
+      parseInt(document.getElementById("clManagers").value) || 0,
+    ),
+    leads: Math.max(0, parseInt(document.getElementById("clLeads").value) || 0),
+  };
+  if (!data.company) {
+    toast("Укажите название компании");
+    return;
+  }
+  if (i < 0) {
+    DATA.clients.push({
+      ...data,
+      joined: new Date().toISOString().slice(0, 10),
+    });
+    toast("Компания добавлена");
+  } else {
+    Object.assign(DATA.clients[i], data);
+    toast("Аккаунт клиента обновлён");
+  }
+  recomputeAdminKpi();
+  closeModal();
+  switchView("clients");
+}
+function deleteClient(i) {
+  const name = DATA.clients[i]?.company || "";
+  DATA.clients.splice(i, 1);
+  recomputeAdminKpi();
+  closeModal();
+  switchView("clients");
+  toast("Компания удалена: " + name);
+}
+
+// ---------- Представление: Настройки ----------
+function viewSettings() {
+  if (IS_ADMIN) return adminSettings();
+  return businessSettings();
+}
+function adminSettings() {
+  const s = getSettings();
+  return `<div class="grid-2">
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">Системные настройки</div></div>
+      ${field("Email поддержки", `<input class="inp" id="setSupport" value="${esc(s.support)}">`)}
+      ${field(
+        "Тариф по умолчанию для новых клиентов",
+        selectHtml(
+          "setDefaultPlan",
+          PLAN_OPTIONS.map((p) => [p, p]),
+          s.defaultPlan,
+        ),
+      )}
+      ${toggleHtml("setAutoAssign", "Автораспределение лидов по менеджерам", s.autoAssign)}
+      ${toggleHtml("setNotify", "Уведомлять менеджеров в Telegram о новых лидах", s.notify)}
+      <button class="btn-d btn-d-primary" style="margin-top:14px" onclick="saveAdminSettings()">${IC.check} Сохранить настройки</button>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">Управление клиентами</div></div>
+      <p style="color:var(--d-text-2);font-size:14px;margin-top:0">Редактируйте аккаунты, тарифы и статусы клиентов на вкладке «Клиенты».</p>
+      <div class="lead-field"><div class="lead-field-label">Компаний в системе</div><div class="lead-field-value">${DATA.adminKpi.clients}</div></div>
+      <div class="lead-field"><div class="lead-field-label">Активных</div><div class="lead-field-value">${DATA.adminKpi.active}</div></div>
+      <button class="btn-d btn-d-ghost" onclick="switchView('clients')">${IC.clients} Перейти к клиентам</button>
+      <button class="btn-d btn-d-primary" style="margin-top:10px" onclick="openClientEditor(-1)">${IC.plus} Добавить компанию</button>
+    </div>
+  </div>`;
+}
+function businessSettings() {
+  return `<div class="grid-2">
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">Профиль</div></div>
+      ${field("Аккаунт", `<input class="inp" value="${esc(SESSION.name)}" disabled>`)}
+      ${field("Организация", `<input class="inp" id="bizCompany" value="${esc(DATA.business.company)}">`)}
+      <button class="btn-d btn-d-primary" style="margin-top:10px" onclick="saveBusinessProfile()">${IC.check} Сохранить</button>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">Тариф и лимиты</div></div>
+      <div class="lead-field"><div class="lead-field-label">Текущий тариф</div><div class="lead-field-value">«${DATA.business.plan}»</div></div>
+      <div class="lead-field"><div class="lead-field-label">Лиды в месяц</div><div class="lead-field-value">${planLeadLimitLabel(DATA.business.plan)}</div></div>
+      <div class="lead-field"><div class="lead-field-label">Каналы</div><div class="lead-field-value">${(function(){const l=planChannelLimit(DATA.business.plan);return l===null?"Без ограничений":"До "+l+" каналов";})()}</div></div>
+      <div class="lead-field"><div class="lead-field-label">Аналитика</div><div class="lead-field-value" style="color:${planHasAnalytics(DATA.business.plan)?"var(--d-green)":"var(--d-amber)"}">${planHasAnalytics(DATA.business.plan)?"Включена":"Доступна на «Премиум»"}</div></div>
+      <button class="btn-d btn-d-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="openPlanUpgrade()">Улучшить тариф</button>
+    </div>
+  </div>`;
+}
+function saveBusinessProfile() {
+  const v = document.getElementById("bizCompany").value.trim();
+  if (v) {
+    DATA.business.company = v;
+    document.querySelector(".user-meta span").textContent = v;
+  }
+  toast("Профиль сохранён");
+}
+// Тарифы для оформления. Цены — демонстрационные, настраиваются на бэкенде.
+const PLAN_INFO = {
+  Бизнес: {
+    price: "2 990 ₽ / мес",
+    features: ["3 канала", "До 1 000 лидов/мес", "Единый инбокс", "Подключение «под ключ»"],
+  },
+  Премиум: {
+    price: "7 990 ₽ / мес",
+    features: ["7 каналов", "До 3 000 лидов/мес", "Аналитика и воронка", "Контроль менеджеров", "Приоритетная поддержка"],
+  },
+  Корпоративный: {
+    price: "по договору",
+    features: ["Каналы и лиды без лимита", "Приоритетная поддержка", "Настройка «под ключ»", "Все аккаунты"],
+  },
+};
+// Подробный состав тарифа (что входит / чего нет) — из данных тарифов
+function chWord(n) {
+  if (n == null) return "Каналы без лимита";
+  const a = n % 100, b = n % 10;
+  const w = a > 10 && a < 20 ? "каналов" : b === 1 ? "канал" : b > 1 && b < 5 ? "канала" : "каналов";
+  return `${n} ${w}`;
+}
+function planDetailLines(title) {
+  const t = TARIFFS.find((x) => x.title === title);
+  if (!t) return [];
+  return [
+    [chWord(t.max_channels), true],
+    [t.max_leads_per_month == null ? "Лиды без ограничений" : "До " + t.max_leads_per_month.toLocaleString("ru-RU") + " лидов/мес", true],
+    ["Единый инбокс и карточки лидов", true],
+    ["CRM-интеграция", true],
+    ["Аналитика и воронка продаж", t.analytics],
+    ["Контроль менеджеров", t.manager_control],
+    [t.max_managers == null ? "Менеджеры без ограничений" : t.max_managers > 0 ? `Мультидоступ: до ${t.max_managers} менеджеров` : "Один пользователь", t.max_managers == null || t.max_managers > 0],
+    ["Приоритетная поддержка", t.priority_support],
+    ["Подключение «под ключ»", t.onboarding],
+    [t.storage_months == null ? "Хранение истории без лимита" : `Хранение истории — ${t.storage_months} мес`, true],
+  ];
+}
+function detailListHtml(title) {
+  return `<ul class="plan-detail-list">${planDetailLines(title)
+    .map(([text, on]) => `<li class="${on ? "pd-yes" : "pd-no"}">${on ? IC.check : IC.close}<span>${text}</span></li>`)
+    .join("")}</ul>`;
+}
+// Если при регистрации был выбран платный тариф — ведём сразу к нему, иначе общий выбор
+const PLAN_CODE_RU = { free: "Бесплатный", business: "Бизнес", premium: "Премиум", enterprise: "Корпоративный" };
+function openDesiredOrUpgrade() {
+  const code = SESSION && SESSION.desiredPlan;
+  const ru = PLAN_CODE_RU[code];
+  if (ru && PLAN_INFO[ru]) return goToCheckout(ru);
+  openPlanUpgrade();
+}
+function openPlanUpgrade() {
+  const cards = Object.entries(PLAN_INFO)
+    .map(([name, info]) => {
+      const current = name === DATA.business.plan;
+      return `<div class="plan-choice ${current ? "is-current" : ""}">
+      <div class="plan-choice-head">
+        <div><div class="plan-choice-name">${name}</div><div class="plan-choice-price">${info.price}</div></div>
+        ${current ? '<span class="tag st-done">Текущий</span>' : `<button class="btn-d btn-d-primary btn-d-sm" onclick="goToCheckout('${name}')">Оформить</button>`}
+      </div>
+      ${detailListHtml(name)}
+    </div>`;
+    })
+    .join("");
+  openModal(
+    "Выбор тарифа",
+    `<p class="modal-hint" style="margin:0 0 14px">Полный состав каждого тарифа — что входит и чего нет:</p><div class="plan-choices">${cards}</div>`,
+    `
+    <button class="btn-d btn-d-ghost" onclick="closeModal()">Закрыть</button>
+  `,
+  );
+}
+// Оформление: сводка заказа + подробный состав + переход к оплате
+function goToCheckout(plan) {
+  const info = PLAN_INFO[plan];
+  openModal(
+    `Оформление тарифа «${plan}»`,
+    `
+    <div class="checkout-summary">
+      <div class="checkout-row"><span>Тариф</span><strong>${plan}</strong></div>
+      <div class="checkout-row"><span>Организация</span><strong>${esc(DATA.business.company)}</strong></div>
+      <div class="checkout-row checkout-total"><span>К оплате</span><strong>${info.price}</strong></div>
+    </div>
+    <div class="checkout-includes">Что входит в тариф «${plan}»:</div>
+    ${detailListHtml(plan)}
+    <p class="modal-hint">Демо-стоимость. Оплата подключается через платёжную систему (ЮKassa / CloudPayments); итоговые цены задаются на бэкенде.</p>
+  `,
+    `
+    <button class="btn-d btn-d-ghost" onclick="openPlanUpgrade()">Назад</button>
+    <button class="btn-d btn-d-primary" onclick="startPayment('${plan}')">Перейти к оплате</button>
+  `,
+  );
+}
+// Точка интеграции платёжной системы. Тариф меняется ТОЛЬКО после успешной оплаты (на бэкенде).
+function startPayment(plan) {
+  // Реальный вариант: window.location.href = URL_оплаты_от_ЮKassa;
+  openModal(
+    "Переход к оплате",
+    `
+    <div style="text-align:center;padding:8px 0">
+      <div class="pay-spinner"></div>
+      <p style="margin-top:14px;color:var(--d-text-2)">Перенаправляем в платёжную систему для оплаты тарифа «${plan}»…</p>
+      <p class="modal-hint">Здесь подключается приём платежей (ЮKassa / CloudPayments). После успешной оплаты тариф активируется автоматически.</p>
+    </div>
+  `,
+    `
+    <button class="btn-d btn-d-ghost" onclick="closeModal()">Отмена</button>
+    <button class="btn-d btn-d-primary" onclick="closeModal(); toast('Демо: оплата тарифа «${plan}» подключается на бэкенде')">Понятно</button>
+  `,
+  );
+  toast("Переход к оплате тарифа «" + plan + "»");
+}
+
+// ---------- Представление: Тарифы (редактирование админом) ----------
+function viewTariffs() {
+  const rows = TARIFFS.map((t, i) => `
+    <tr>
+      <td class="cell-strong">${esc(t.title)}${t.trial_days ? ` <span class="tag st-pending">${t.trial_days} дн.</span>` : ""}</td>
+      <td>${fmtMoney(t.price_month)}${t.price_month ? '<span class="cell-muted">/мес</span>' : ""}</td>
+      <td class="cell-muted">${fmtLimit(t.max_channels)}</td>
+      <td class="cell-muted">${fmtLimit(t.max_leads_per_month)}</td>
+      <td>${yesNo(t.analytics)}</td>
+      <td>${yesNo(t.manager_control)}</td>
+      <td>${yesNo(t.priority_support)}</td>
+      <td class="cell-muted">${fmtStorage(t.storage_months)}</td>
+      <td class="cell-muted">${fmtLimit(t.max_managers)}</td>
+      <td><button class="btn-d btn-d-ghost btn-d-sm" onclick="openTariffEditor(${i})">${IC.edit} Изменить</button></td>
+    </tr>`).join("");
+  return `<div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">Тарифы<span>значения по умолчанию из кода, правки применяются сразу</span></div>
+    </div>
+    <p style="color:var(--d-text-2);font-size:14px;margin:0 0 16px">Здесь редактируются цены и лимиты тарифов. В демо изменения сохраняются локально; в рабочей версии уходят в базу (<code>PATCH /api/admin/tariffs/{plan}</code>) и подхватываются лимитами каналов, лидов и аналитики.</p>
+    <div class="table-scroll">
+      <table class="table" id="tariffsTable">
+        <thead><tr><th>Тариф</th><th>Цена</th><th>Каналы</th><th>Лиды/мес</th><th>Аналитика</th><th>Контроль</th><th>Приоритет</th><th>Хранение</th><th>Менеджеры</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><div class="panel-title">Скидки за период</div></div>
+    <div class="discount-grid">
+      <div class="discount-cell"><span>3 месяца</span><strong>−10%</strong></div>
+      <div class="discount-cell"><span>6 месяцев</span><strong>−15%</strong></div>
+      <div class="discount-cell"><span>12 месяцев</span><strong>−30%</strong></div>
+    </div>
+    <p style="color:var(--d-text-2);font-size:13px;margin:14px 0 0">Meta-надбавка (Instagram/WhatsApp): +500 ₽ к тарифу или 1 990 ₽ отдельным пакетом.</p>
+  </div>`;
+}
+function numOrNull(id) {
+  const v = document.getElementById(id).value.trim();
+  return v === "" ? null : Math.max(0, parseInt(v, 10) || 0);
+}
+function openTariffEditor(i) {
+  const t = TARIFFS[i];
+  openModal(`Тариф «${t.title}»`, `
+    ${field("Название", `<input class="inp" id="tfTitle" value="${esc(t.title)}">`)}
+    <div class="form-2col">
+      ${field("Цена ₽/мес (пусто = по договору)", `<input class="inp" id="tfPrice" type="number" min="0" value="${t.price_month == null ? "" : t.price_month}">`)}
+      ${field("Пробный период, дней", `<input class="inp" id="tfTrial" type="number" min="0" value="${t.trial_days}">`)}
+    </div>
+    <div class="form-2col">
+      ${field("Каналов (пусто = ∞)", `<input class="inp" id="tfCh" type="number" min="0" value="${t.max_channels == null ? "" : t.max_channels}">`)}
+      ${field("Лидов/мес (пусто = ∞)", `<input class="inp" id="tfLeads" type="number" min="0" value="${t.max_leads_per_month == null ? "" : t.max_leads_per_month}">`)}
+    </div>
+    ${field("Хранение истории, мес (пусто = ∞)", `<input class="inp" id="tfStorage" type="number" min="0" value="${t.storage_months == null ? "" : t.storage_months}">`)}
+    ${field("Мест менеджеров (пусто = ∞, 0 = без мультидоступа)", `<input class="inp" id="tfManagers" type="number" min="0" value="${t.max_managers == null ? "" : t.max_managers}">`)}
+    ${toggleHtml("tfAnalytics", "Аналитика и воронка", t.analytics)}
+    ${toggleHtml("tfManager", "Контроль менеджеров", t.manager_control)}
+    ${toggleHtml("tfPriority", "Приоритетная поддержка", t.priority_support)}
+    ${toggleHtml("tfOnboarding", "Подключение «под ключ»", t.onboarding)}
+  `, `
+    <button class="btn-d btn-d-ghost" onclick="closeModal()">Отмена</button>
+    <button class="btn-d btn-d-primary" onclick="saveTariff(${i})">${IC.check} Сохранить</button>
+  `);
+}
+function saveTariff(i) {
+  const t = TARIFFS[i];
+  t.title = document.getElementById("tfTitle").value.trim() || t.title;
+  t.price_month = numOrNull("tfPrice");
+  t.trial_days = Math.max(0, parseInt(document.getElementById("tfTrial").value, 10) || 0);
+  t.max_channels = numOrNull("tfCh");
+  t.max_leads_per_month = numOrNull("tfLeads");
+  t.storage_months = numOrNull("tfStorage");
+  t.max_managers = numOrNull("tfManagers");
+  t.analytics = document.getElementById("tfAnalytics").checked;
+  t.manager_control = document.getElementById("tfManager").checked;
+  t.priority_support = document.getElementById("tfPriority").checked;
+  t.onboarding = document.getElementById("tfOnboarding").checked;
+  closeModal();
+  switchView("tariffs");
+  toast(`Тариф «${t.title}» обновлён`);
+}
+
+// ---------- Аналитика админа: SaaS-метрики по нашим клиентам ----------
+const PLAN_PRICE_RU = { "Бизнес": 2990, "Премиум": 7990 };
+function adminAnalytics() {
+  const clients = DATA.clients;
+  const active = clients.filter((c) => c.status === "active");
+  const mrr = active.reduce((s, c) => s + (PLAN_PRICE_RU[c.plan] || 0), 0);
+  const paying = active.filter((c) => PLAN_PRICE_RU[c.plan]).length;
+  const corp = clients.filter((c) => c.plan === "Корпоративный").length;
+  const arpu = paying ? Math.round(mrr / paying) : 0;
+
+  const tiers = ["Бесплатный", "Бизнес", "Премиум", "Корпоративный"];
+  const byTier = tiers.map((t) => ({ label: t, value: clients.filter((c) => c.plan === t).length }));
+  const top = clients.slice().sort((a, b) => b.leads - a.leads).slice(0, 5)
+    .map((c) => ({ label: c.company.length > 16 ? c.company.slice(0, 15) + "…" : c.company, value: c.leads }));
+  const growth = adminGrowthByMonth();
+
+  const kpi = [
+    ["MRR (выручка/мес)", fmtMoney(mrr), `платящих: ${paying}`],
+    ["ARPU (средний чек)", fmtMoney(arpu), "по платным"],
+    ["Клиентов всего", clients.length, `активных: ${active.length}`],
+    ["Корпоративных", corp, "по договору"],
+  ];
+  const kpiHtml = kpi.map((k) => `
+    <div class="kpi-card"><div class="kpi-label">${k[0]}</div>
+      <div class="kpi-value">${k[1]}</div><div class="kpi-delta up">${k[2]}</div></div>`).join("");
+
+  return `
+    <div class="kpi-grid">${kpiHtml}</div>
+    <div class="grid-2">
+      <div class="panel"><div class="panel-head"><div class="panel-title">Клиенты по тарифам</div></div>${barChart(byTier)}</div>
+      <div class="panel"><div class="panel-head"><div class="panel-title">Топ клиентов по лидам</div></div>${barChart(top)}</div>
+    </div>
+    <div class="panel"><div class="panel-head"><div class="panel-title">Подключения клиентов по месяцам</div>${liveBadge()}</div>${barChart(growth)}</div>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Отток и переходы</div><span class="tag st-pending">появится с данными</span></div>
+        <div class="saas-placeholder">
+          <div class="ph-row"><span>Ушло за месяц</span><strong>—</strong></div>
+          <div class="ph-row"><span>Перешли с бесплатного на платный</span><strong>—</strong></div>
+          <div class="ph-row"><span>Повысили тариф</span><strong>—</strong></div>
+        </div>
+        <p class="modal-hint">Считается по событиям смены тарифа (таблица <code>events</code>). Появится, когда накопится история.</p>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Веб-аналитика посетителей</div><span class="tag st-pending">демо · Яндекс.Метрика</span></div>
+        <div class="saas-placeholder">
+          <div class="ph-row"><span>Заходов на сайт</span><strong>1 248</strong></div>
+          <div class="ph-row"><span>Просмотров тарифов</span><strong>412</strong></div>
+          <div class="ph-row"><span>Регистраций (пробный)</span><strong>37</strong></div>
+          <div class="ph-row"><span>Оплат</span><strong>9</strong></div>
+          <div class="ph-row"><span>Конверсия «зашёл → оплата»</span><strong>0,7%</strong></div>
+        </div>
+        <p class="modal-hint">Цифры демонстрационные. Реальные — из Яндекс.Метрики и таблицы <code>events</code>.</p>
+      </div>
+    </div>
+    <div class="panel"><div class="panel-head"><div class="panel-title">Нагрузка на платформу</div></div>
+      <div class="discount-grid">
+        <div class="discount-cell"><span>Каналов подключено</span><strong>${DATA.adminKpi.channels}</strong></div>
+        <div class="discount-cell"><span>Лидов обработано</span><strong>${DATA.adminKpi.leads.toLocaleString("ru-RU")}</strong></div>
+        <div class="discount-cell"><span>Активных клиентов</span><strong>${active.length}</strong></div>
+      </div>
+    </div>`;
+}
+function adminGrowthByMonth() {
+  const map = {};
+  DATA.clients.forEach((c) => { const k = (c.joined || "").slice(0, 7); if (k) map[k] = (map[k] || 0) + 1; });
+  return Object.keys(map).sort().map((k) => {
+    const [y, m] = k.split("-");
+    return { label: RU_MONTHS[parseInt(m, 10) - 1].slice(0, 3) + " " + y.slice(2), value: map[k] };
+  });
+}
+
+// ---------- Представление: Менеджеры (мультидоступ + контроль) ----------
+function mgrMetrics(m) {
+  const assigned = m.assigned || 0;
+  const done = m.done || 0;
+  const inWork = m.inWork != null ? m.inWork : Math.max(0, assigned - done);
+  const conversion = m.conversion != null ? m.conversion : assigned ? Math.round((done / assigned) * 100) : 0;
+  return { assigned, done, inWork, conversion, avgResp: m.avgResp || "—", lastActive: m.lastActive || "—" };
+}
+function viewTeam() {
+  const plan = DATA.business.plan;
+  const limit = planManagerLimit(plan);
+  const mgrs = DATA.business.managers;
+  const used = mgrs.length;
+  const canAdd = limit === null || used < limit;
+  const limitLabel = limit === null ? "∞" : limit;
+
+  const enriched = mgrs.map((m) => ({ ...m, ...mgrMetrics(m) }));
+  const totalAssigned = enriched.reduce((s, m) => s + m.assigned, 0);
+  const totalInWork = enriched.reduce((s, m) => s + m.inWork, 0);
+  const totalDone = enriched.reduce((s, m) => s + m.done, 0);
+  const avgConv = enriched.length ? Math.round(enriched.reduce((s, m) => s + m.conversion, 0) / enriched.length) : 0;
+
+  const seatsPanel = `
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-head">
+        <div class="panel-title">Места менеджеров<span>использовано ${used} из ${limitLabel} по тарифу «${plan}»</span></div>
+        ${canAdd
+          ? `<button class="btn-d btn-d-primary btn-d-sm" onclick="openInviteManager()">${IC.plus} Пригласить менеджера</button>`
+          : `<span class="tag st-pending">Все места заняты</span>`}
+      </div>
+      <p style="color:var(--d-text-2);font-size:14px;margin:0">Менеджеры работают в общем инбоксе. К каждому лиду прикрепляется ответственный — вы видите, кто ведёт клиента, и следите за нагрузкой и конверсией каждого.</p>
+    </div>`;
+
+  if (!enriched.length) {
+    return seatsPanel + `<div class="panel"><div class="empty-hint">Пока нет менеджеров — пригласите первого, и здесь появится аналитика по их работе.</div></div>`;
+  }
+
+  const kpi = [
+    ["Менеджеров", used, "активных: " + enriched.filter((m) => m.active !== false).length],
+    ["Лидов в работе", totalInWork, "всего назначено: " + totalAssigned],
+    ["Завершено", totalDone, "командой"],
+    ["Средняя конверсия", avgConv + "%", "по команде"],
+  ];
+  const kpiHtml = kpi
+    .map((k) => `<div class="kpi-card"><div class="kpi-label">${k[0]}</div><div class="kpi-value">${k[1]}</div><div class="kpi-delta up">${k[2]}</div></div>`)
+    .join("");
+
+  const loadBars = barChart(enriched.map((m) => ({ label: m.name.split(" ")[0], value: m.assigned })));
+  const convBars = barChart(enriched.map((m) => ({ label: m.name.split(" ")[0], value: m.conversion })));
+
+  const rows = enriched
+    .map((m, i) => {
+      const share = totalAssigned ? Math.round((m.assigned / totalAssigned) * 100) : 0;
+      return `<tr>
+      <td class="cell-strong">${esc(m.name)}<div class="cell-sub">${esc(m.email || "")}</div></td>
+      <td class="cell-muted">${m.assigned}<div class="load-bar"><span style="width:${share}%"></span></div></td>
+      <td><span class="tag st-progress">${m.inWork}</span></td>
+      <td class="cell-muted">${m.done}</td>
+      <td><span class="conv-badge ${m.conversion >= 60 ? "good" : m.conversion >= 35 ? "mid" : "low"}">${m.conversion}%</span></td>
+      <td class="cell-muted">${esc(m.avgResp)}</td>
+      <td class="cell-muted">${esc(m.lastActive)}</td>
+      <td><span class="${m.active !== false ? "st-active" : "st-error"}" style="font-size:13px">● ${m.active !== false ? "Активен" : "Отключён"}</span></td>
+      <td>
+        <button class="btn-d btn-d-ghost btn-d-sm" onclick="toggleManager(${i})">${m.active !== false ? "Отключить" : "Включить"}</button>
+        <button class="btn-d btn-d-ghost btn-d-sm" onclick="removeManager(${i})">Удалить</button>
+      </td>
+    </tr>`;
+    })
+    .join("");
+
+  return (
+    seatsPanel +
+    `<div class="kpi-grid">${kpiHtml}</div>
+    <div class="grid-2">
+      <div class="panel"><div class="panel-head"><div class="panel-title">Нагрузка по менеджерам</div><span class="cell-muted" style="font-size:12px">назначенных лидов</span></div>${loadBars}</div>
+      <div class="panel"><div class="panel-head"><div class="panel-title">Конверсия по менеджерам</div><span class="cell-muted" style="font-size:12px">завершено / назначено</span></div>${convBars}</div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">Детально по менеджерам<span>назначено, в работе, конверсия, отклик</span></div>${liveBadge()}</div>
+      <div class="table-scroll">
+        <table class="table" id="teamTable">
+          <thead><tr><th>Менеджер</th><th>Назначено</th><th>В работе</th><th>Завершено</th><th>Конверсия</th><th>Ср. ответ</th><th>Активность</th><th>Статус</th><th></th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`
+  );
+}
+function openInviteManager() {
+  const limit = planManagerLimit(DATA.business.plan);
+  if (limit !== null && DATA.business.managers.length >= limit) {
+    toast("Все места менеджеров заняты");
+    return;
+  }
+  openModal("Пригласить менеджера", `
+    ${field("Имя", `<input class="inp" id="mgName" placeholder="Имя менеджера">`)}
+    ${field("Email для входа", `<input class="inp" id="mgEmail" placeholder="manager@company.ru">`)}
+    ${field("Временный пароль", `<input class="inp" id="mgPass" placeholder="минимум 6 символов">`)}
+    <p class="modal-hint">Менеджер войдёт по этим данным и получит доступ только к инбоксу, лидам и каналам. В демо приглашение добавляется локально; в рабочей версии — <code>POST /api/team/members</code>.</p>
+  `, `
+    <button class="btn-d btn-d-ghost" onclick="closeModal()">Отмена</button>
+    <button class="btn-d btn-d-primary" onclick="saveManager()">${IC.check} Пригласить</button>
+  `);
+}
+function saveManager() {
+  const name = document.getElementById("mgName").value.trim();
+  const email = document.getElementById("mgEmail").value.trim();
+  if (!name || !email) { toast("Укажите имя и email"); return; }
+  DATA.business.managers.push({ id: Date.now(), name, email, active: true, assigned: 0, done: 0, avgResp: "—", lastActive: "только что" });
+  closeModal();
+  switchView("team");
+  toast("Менеджер приглашён: " + name);
+}
+function toggleManager(i) {
+  DATA.business.managers[i].active = !DATA.business.managers[i].active;
+  switchView("team");
+  toast("Статус менеджера обновлён");
+}
+function removeManager(i) {
+  const name = DATA.business.managers[i].name;
+  DATA.business.managers.splice(i, 1);
+  switchView("team");
+  toast("Менеджер удалён: " + name);
+}
+
+// ---------- Настройки (persist) ----------
+function getSettings() {
+  const def = {
+    support: "help@lidostok.ru",
+    defaultPlan: "Бесплатный",
+    autoAssign: true,
+    notify: true,
+  };
+  try {
+    return {
+      ...def,
+      ...(JSON.parse(localStorage.getItem("lidostok_settings")) || {}),
+    };
+  } catch {
+    return def;
+  }
+}
+function saveAdminSettings() {
+  const s = {
+    support: document.getElementById("setSupport").value.trim(),
+    defaultPlan: document.getElementById("setDefaultPlan").value,
+    autoAssign: document.getElementById("setAutoAssign").checked,
+    notify: document.getElementById("setNotify").checked,
+  };
+  localStorage.setItem("lidostok_settings", JSON.stringify(s));
+  toast("Настройки сохранены");
+}
+
+// ---------- Формы / модалки ----------
+function field(label, control) {
+  return `<div class="field"><label class="field-label">${label}</label>${control}</div>`;
+}
+function selectHtml(id, options, current) {
+  return `<select class="inp" id="${id}">${options.map(([v, l]) => `<option value="${v}" ${v === current ? "selected" : ""}>${l}</option>`).join("")}</select>`;
+}
+function toggleHtml(id, label, on) {
+  return `<label class="toggle-row"><span>${label}</span>
+    <span class="switch"><input type="checkbox" id="${id}" ${on ? "checked" : ""}><span class="slider"></span></span></label>`;
+}
+function openModal(title, body, footer) {
+  closeModal();
+  const el = document.createElement("div");
+  el.className = "modal-overlay";
+  el.id = "modalOverlay";
+  el.onclick = (e) => {
+    if (e.target === el) closeModal();
+  };
+  el.innerHTML = `<div class="modal">
+    <div class="modal-head"><h3>${title}</h3><button class="modal-close" onclick="closeModal()">${IC.close}</button></div>
+    <div class="modal-body">${body}</div>
+    <div class="modal-foot">${footer || ""}</div>
+  </div>`;
+  document.body.appendChild(el);
+  document.addEventListener("keydown", escClose);
+}
+function escClose(e) {
+  if (e.key === "Escape") closeModal();
+}
+function closeModal() {
+  const el = document.getElementById("modalOverlay");
+  if (el) el.remove();
+  document.removeEventListener("keydown", escClose);
+}
+
+// ---------- Глобальный поиск (фильтрует текущий экран) ----------
+function globalSearch(query) {
+  const q = (query || "").toLowerCase().trim();
+  const items = document.querySelectorAll(
+    "#content tbody tr, #content .conv-item, #content .channel-card:not(.ch-add)",
+  );
+  items.forEach((el) => {
+    el.style.display =
+      !q || el.textContent.toLowerCase().includes(q) ? "" : "none";
+  });
+}
+
+// ---------- Реестр представлений ----------
+const VIEWS = {
+  overview: {
+    title: "Обзор",
+    sub: "Ключевые показатели",
+    render: viewOverview,
+  },
+  inbox: {
+    title: "Инбокс",
+    sub: "Все сообщения в одном месте",
+    render: viewInbox,
+  },
+  leads: { title: "Лиды", sub: "Структурированные заявки", render: viewLeads },
+  channels: {
+    title: "Каналы",
+    sub: "Подключённые источники",
+    render: viewChannels,
+  },
+  analytics: {
+    title: "Аналитика",
+    sub: IS_ADMIN ? "Наш бизнес: клиенты, выручка, рост" : "Источники, менеджеры, воронка",
+    render: viewAnalytics,
+  },
+  clients: {
+    title: "Клиенты системы",
+    sub: "Все компании на платформе",
+    render: viewClients,
+  },
+  tariffs: {
+    title: "Тарифы",
+    sub: "Цены, лимиты и права по тарифам",
+    render: viewTariffs,
+  },
+  team: {
+    title: "Менеджеры",
+    sub: "Доступы и контроль работы",
+    render: viewTeam,
+  },
+  settings: {
+    title: "Настройки",
+    sub: "Профиль и тариф",
+    render: viewSettings,
+  },
+};
+const ALLOWED = new Set(buildMenu().map((m) => m.id));
+
+// ---------- Каркас и навигация ----------
+function switchView(id) {
+  if (!ALLOWED.has(id)) id = "overview"; // роль не имеет доступа к разделу
+  const v = VIEWS[id];
+  if (!v) return;
+  closeModal();
+  document.getElementById("viewTitle").textContent = v.title;
+  document.getElementById("viewSub").textContent = v.sub;
+  document.getElementById("content").innerHTML =
+    `<div class="view active">${v.render()}</div>`;
+  document
+    .querySelectorAll(".nav-item")
+    .forEach((el) => el.classList.toggle("active", el.dataset.view === id));
+  document.getElementById("sidebar").classList.remove("open");
+  const searchInput = document.getElementById("topSearch");
+  if (searchInput) searchInput.value = "";
+  location.hash = id;
+  startLiveClock();
+}
+
+// ---------- Живые часы (реальное время в статистике) ----------
+let _liveTimer = null;
+function startLiveClock() {
+  if (_liveTimer) clearInterval(_liveTimer);
+  const tick = () => {
+    const t = new Date().toLocaleTimeString("ru-RU");
+    document
+      .querySelectorAll("#liveClock")
+      .forEach((el) => (el.textContent = t));
+  };
+  if (document.getElementById("liveClock")) {
+    tick();
+    _liveTimer = setInterval(tick, 1000);
+  }
+}
+
+function toast(msg) {
+  let t = document.getElementById("toast");
+  if (!t) {
+    t = document.createElement("div");
+    t.id = "toast";
+    t.className = "toast";
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(window._toastT);
+  window._toastT = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+function initDashboard() {
+  // Пробный период истёк — показываем экран блокировки вместо панели
+  if (TRIAL_EXPIRED) { renderTrialBlock(); return; }
+
+  const initials = (SESSION.name || "U")
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+  const nav = buildMenu()
+    .map(
+      (m) => `
+    <button class="nav-item" data-view="${m.id}" onclick="switchView('${m.id}')">
+      ${m.icon}<span>${m.label}</span>
+      ${m.badge ? `<span class="nav-badge ${m.amber ? "amber" : ""}">${m.badge}</span>` : ""}
+    </button>`,
+    )
+    .join("");
+
+  const trialBar = IS_TRIAL
+    ? `<div class="trial-bar">
+        <span class="trial-bar-text">Пробный период — осталось <strong>${pluralDays(trialDaysLeft())}</strong>. После окончания нужно выбрать платный тариф.</span>
+        <button class="trial-bar-btn" onclick="openDesiredOrUpgrade()">Оформить подписку</button>
+      </div>`
+    : "";
+
+  document.getElementById("app").innerHTML = `
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo"><img src="images/logo-dark.png" alt="Лидосток" onerror="this.style.display='none'"><span style="font-weight:800;font-size:17px">Лидосток</span></div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">${IS_ADMIN ? "Администрирование" : "Рабочее место"}</div>
+        ${nav}
+      </nav>
+      <div class="sidebar-user">
+        <button class="user-profile" onclick="switchView('settings')" title="Открыть настройки">
+          <div class="user-avatar">${initials}</div>
+          <div class="user-meta"><strong>${esc(SESSION.name)}</strong><span>${IS_ADMIN ? "admin" : esc(DATA.business.company)}</span></div>
+        </button>
+        <button class="sidebar-exit" onclick="logout()" title="Выйти на главную">${IC.logout}<span>Выйти</span></button>
+      </div>
+    </aside>
+    <div class="main">
+      <div class="topbar">
+        <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">${IC.menu}</button>
+        <div><h1 id="viewTitle">Обзор</h1><div class="topbar-sub" id="viewSub">Ключевые показатели</div></div>
+        <div class="topbar-spacer"></div>
+        <div class="search-box">
+          ${IC.search}
+          <input id="topSearch" placeholder="Поиск..." oninput="globalSearch(this.value)">
+        </div>
+        ${planPill()}
+      </div>
+      ${trialBar}
+      <div class="content" id="content"></div>
+    </div>`;
+
+  const start = (location.hash || "#overview").slice(1);
+  switchView(ALLOWED.has(start) ? start : "overview");
+}
+
+// Экран после окончания пробного периода: выбор тарифа + выход
+function renderTrialBlock() {
+  const cards = Object.entries(PLAN_INFO)
+    .map(
+      ([name, info]) => `
+    <div class="tb-plan">
+      <div class="tb-plan-name">${name}</div>
+      <div class="tb-plan-price">${info.price}</div>
+      <ul>${info.features.map((f) => `<li>${IC.check} ${f}</li>`).join("")}</ul>
+      <button class="btn-d btn-d-primary" style="width:100%;justify-content:center" onclick="goToCheckout('${name}')">Оформить</button>
+    </div>`,
+    )
+    .join("");
+  document.getElementById("app").innerHTML = `
+    <div class="trial-block">
+      <div class="trial-block-card">
+        <div class="tb-icon">${IC.lock}</div>
+        <h1>Пробный период истёк</h1>
+        <p>14 дней бесплатного доступа закончились. Все ваши данные и настройки сохранены — чтобы продолжить принимать лиды и работать с инбоксом, выберите тариф.</p>
+        <div class="tb-plans">${cards}</div>
+        <button class="tb-logout" onclick="logout()">${IC.logout} Выйти</button>
+      </div>
+    </div>`;
+}
+
+// Относительное время «N мин/ч/дн» из ISO-даты
+function relTime(iso) {
+  if (!iso) return "";
+  const m = Math.floor((Date.now() - Date.parse(iso)) / 60000);
+  if (m < 1) return "только что";
+  if (m < 60) return m + " мин";
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + " ч";
+  return Math.floor(h / 24) + " дн";
+}
+
+// Загрузка реальных лидов из API в общий инбокс/лиды. Мягкий фолбэк на демо.
+async function loadRealData() {
+  try {
+    const leads = await window.API.leads(); // GET /api/leads — по своему tenant_id, новые сверху
+    DATA.business.conversations = leads.map((l) => {
+      const st = ["new", "progress", "done"].includes(l.status) ? l.status : "new";
+      const ch = CH_META[l.channel] ? l.channel : "telegram";
+      return {
+        id: l.conversation_id, // реальный id диалога — для смены статуса и назначения менеджера
+        name: l.who, channel: ch, time: relTime(l.created_at),
+        status: st, preview: l.want, date: (l.created_at || "").slice(0, 10),
+        managerId: l.manager_id || null, managerName: l.manager || null,
+        lead: { who: l.who, source: l.source, want: l.want, contact: l.contact },
+        messages: [{ dir: "in", text: l.want, time: "" }],
+      };
+    });
+  } catch (e) {
+    console.warn("[API] лиды недоступны — показываю демо-данные:", e.message);
+  }
+  // Список менеджеров для назначения (доступен владельцу на Премиум+)
+  if (IS_OWNER && planHasManagerControl(DATA.business.plan)) {
+    try {
+      const members = await window.API.teamMembers();
+      DATA.business.managers = members
+        .filter((m) => m.role === "manager")
+        .map((m) => ({ id: m.id, name: m.name || m.email, email: m.email, active: m.is_active }));
+      // реальные показатели работы (назначено, в работе, конверсия, отклик)
+      const act = await window.API.teamActivity();
+      const byId = {};
+      (act.managers || []).forEach((a) => (byId[a.id] = a));
+      DATA.business.managers.forEach((m) => {
+        const a = byId[m.id];
+        if (a) {
+          m.assigned = a.assigned;
+          m.inWork = a.in_progress;
+          m.done = a.done;
+          m.conversion = a.conversion;
+          m.avgResp = a.avg_response_seconds != null ? Math.round(a.avg_response_seconds / 60) + " мин" : "—";
+          m.lastActive = "—";
+        }
+      });
+    } catch (e) {
+      /* оставляем демо-список */
+    }
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  // Для реальной сессии (есть токен) подтягиваем данные из БД, иначе — демо.
+  if (SESSION && SESSION.real && SESSION.token && window.API) {
+    await loadRealData();
+  }
+  initDashboard();
+});

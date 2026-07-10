@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Карта развития — Лидосток</title>
+  <meta name="description" content="Что уже работает в Лидостоке и что мы реализуем в ближайшее время: интеграции, ответы из системы, ИИ-аналитика и голосовой приём заявок.">
+  <link rel="icon" type="image/png" href="images/logo-dark.png">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header" id="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <img src="images/logo-light.png" alt="Лидосток" class="logo-img">
+      </a>
+      <nav class="nav">
+        <a href="about.html" class="nav-link">О нас</a>
+        <a href="blog.html" class="nav-link">Блог</a>
+        <a href="index.html#pricing" class="nav-link">Тарифы</a>
+        <a href="contact.html" class="nav-link">Контакты</a>
+      </nav>
+      <div class="header-buttons">
+        <a href="login.html" class="header-login">Войти</a>
+        <a href="register.html" class="btn btn-primary">Начать бесплатно</a>
+      </div>
+      <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-close" onclick="toggleMenu()">&times;</button>
+    <a href="about.html" class="mobile-link" onclick="toggleMenu()">О нас</a>
+    <a href="blog.html" class="mobile-link" onclick="toggleMenu()">Блог</a>
+    <a href="index.html#pricing" class="mobile-link" onclick="toggleMenu()">Тарифы</a>
+    <a href="contact.html" class="mobile-link" onclick="toggleMenu()">Контакты</a>
+    <a href="login.html" class="mobile-link" onclick="toggleMenu()">Войти</a>
+    <a href="register.html" class="btn btn-primary" onclick="toggleMenu()">Начать бесплатно</a>
+  </div>
+
+  <!-- ===== HERO ===== -->
+  <section class="rm-hero">
+    <div class="rm-hero-glow"></div>
+    <div class="container">
+      <p class="eyebrow" style="text-align:center">КАРТА РАЗВИТИЯ</p>
+      <h1 class="rm-hero-title">Мы строим Лидосток <span class="grad-text">открыто</span></h1>
+      <p class="rm-hero-sub">Вот что уже работает, а что мы реализуем в ближайшие месяцы. Карта живая — мы дополняем её по мере развития продукта.</p>
+      <div class="rm-legend">
+        <span class="rm-leg"><i class="dot done"></i> Готово</span>
+        <span class="rm-leg"><i class="dot doing"></i> В работе</span>
+        <span class="rm-leg"><i class="dot planned"></i> Запланировано</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TIMELINE ===== -->
+  <section class="rm-section">
+    <div class="container">
+      <div class="roadmap-timeline" id="timeline">
+        <div class="tl-track"><div class="tl-progress" id="tlProgress"></div></div>
+
+        <!-- СЕЙЧАС -->
+        <div class="tl-node" data-side="left">
+          <div class="tl-marker done"></div>
+          <div class="tl-card">
+            <div class="tl-badge done">Сейчас · доступно</div>
+            <h3>Что уже работает</h3>
+            <ul class="tl-list">
+              <li class="ok">Единый инбокс: <b>Telegram, Email, ВКонтакте</b> — все заявки в одном окне</li>
+              <li class="ok">Структурированные карточки лидов: кто, откуда, чего хочет, контакт</li>
+              <li class="ok">Ответственный менеджер на каждом лиде — директор видит, кто ведёт клиента</li>
+              <li class="ok">Мультидоступ менеджеров с отдельным входом и контролем работы (Премиум)</li>
+              <li class="ok">Аналитика и воронка, тарифы, пробный период, конструктор подписки</li>
+              <li class="ok">Мультитенантность, изоляция данных клиентов, шифрование доступов к каналам</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Q3 2026 -->
+        <div class="tl-node" data-side="right">
+          <div class="tl-marker doing"></div>
+          <div class="tl-card">
+            <div class="tl-badge doing">Q3 2026 · на подключении</div>
+            <h3>Больше каналов и CRM</h3>
+            <ul class="tl-list">
+              <li class="doing"><b>ВКонтакте — полная двусторонняя работа:</b> ответы клиенту и подстановка имён из профиля (доводим до уровня Telegram к запуску)</li>
+              <li class="plan"><b>Bitrix24:</b> автоматическая передача лидов в вашу CRM в момент поступления</li>
+              <li class="plan"><b>amoCRM:</b> интеграция и синхронизация сделок</li>
+              <li class="plan"><b>Яндекс.Директ:</b> лиды из рекламных форм сразу в инбокс</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Q4 2026 -->
+        <div class="tl-node" data-side="left">
+          <div class="tl-marker planned"></div>
+          <div class="tl-card">
+            <div class="tl-badge planned">Q4 2026 · до конца года</div>
+            <h3>Ответы из системы и ИИ-аналитика</h3>
+            <ul class="tl-list">
+              <li class="plan"><b>Ответы клиенту прямо из Лидостока</b> — исходящие сообщения во все каналы, не переключаясь между приложениями</li>
+              <li class="plan"><b>WhatsApp</b> (через Meta Business API)</li>
+              <li class="plan"><b>Instagram Direct</b> — переписка из Instagram в общий инбокс</li>
+              <li class="plan"><b>Расширенная ИИ-аналитика:</b> умные сводки по лиду, авто-теги, приоритизация «горячих» заявок</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 2027 ФЛАГМАН -->
+        <div class="tl-node flagship" data-side="right">
+          <div class="tl-marker flagship"></div>
+          <div class="tl-card is-flagship">
+            <div class="tl-badge flagship">2027 · флагман</div>
+            <div class="flag-ribbon">Конкурентное преимущество</div>
+            <h3>🎙 ИИ-агент для телефонных звонков</h3>
+            <p class="tl-lead">Как у крупных банков: ИИ-агент принимает входящий звонок, распознаёт речь, превращает разговор в текст — и автоматически создаёт лид в инбоксе. Ни одной потерянной заявки, даже если менеджер не взял трубку.</p>
+            <ul class="tl-list">
+              <li class="plan">Приём и расшифровка звонков → карточка лида с сутью запроса</li>
+              <li class="plan">Углублённая ИИ-аналитика и прогноз продаж</li>
+              <li class="plan">Другие каналы: Viber, Avito, Google Ads</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CTA -->
+      <div class="rm-cta">
+        <h2>Начните с того, что уже работает</h2>
+        <p>Подключите Telegram, почту и ВКонтакте сегодня — а новые возможности будут открываться автоматически.</p>
+        <div class="rm-cta-btns">
+          <a href="register.html" class="btn btn-primary btn-lg">Начать бесплатно</a>
+          <a href="contact.html" class="btn btn-outline btn-lg">Задать вопрос</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo"><img src="images/logo-light.png" alt="Лидосток" class="logo-img"></div>
+          <p>Единая система для сбора, распределения и аналитики лидов.</p>
+          <p style="margin-top:8px;font-size:12px;font-weight:700;letter-spacing:0.15em;color:var(--blue);">ЛИДЫ В ПОТОК. ПРОДАЖИ В РОСТ.</p>
+        </div>
+        <div class="footer-col">
+          <h4>ПРОДУКТ</h4>
+          <a href="index.html#features">Возможности</a>
+          <a href="index.html#integrations">Интеграции</a>
+          <a href="roadmap.html">Карта развития</a>
+          <a href="calculator.html">Конструктор</a>
+        </div>
+        <div class="footer-col">
+          <h4>КОМПАНИЯ</h4>
+          <a href="about.html">О нас</a>
+          <a href="blog.html">Блог</a>
+          <a href="soon.html?page=careers">Карьера</a>
+          <a href="contact.html">Контакты</a>
+        </div>
+        <div class="footer-col">
+          <h4>ПОДДЕРЖКА</h4>
+          <a href="soon.html?page=help">Помощь</a>
+          <a href="soon.html?page=docs">Документация</a>
+          <a href="soon.html?page=status">Статус системы</a>
+          <a href="soon.html?page=security">Безопасность</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Лидосток. Все права защищены.</p>
+        <div>
+          <a href="privacy.html">Политика конфиденциальности</a>
+          <a href="terms.html">Условия использования</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script src="roadmap.js"></script>
+  <script src="cookie.js"></script>
+</body>
+</html>
